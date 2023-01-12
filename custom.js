@@ -149,8 +149,8 @@ module.exports = {
                  data['Auth']['ip'] = clientIp;
 
                 // let smsCode = await SendSms_With_Kavehnegar(data['Auth']['mobileNumber']);
-                let smsCode = 1;
-                data['Auth']['smsCode'] = 'smsCode';
+                let smsCode = 12345;
+                data['Auth']['smsCode'] = smsCode;
                 data['Auth']['expiredSmsCode'] = new Date().getTime() + config_expireSmsCode;
  
                  Create(data , null).then(result=>{});
@@ -169,7 +169,7 @@ module.exports = {
                         managementGuard:{
                             id: _find_guard['data'][0]['_id'],
                             canActivate: true,
-                            expireTime: new Date().getTime() + config_guards['start-register-TO-register']
+                            expireTime: new Date().getTime() + config_guards['start-login-TO-login']
                         }
                      }
                 }
@@ -209,8 +209,8 @@ module.exports = {
                     obj['Auth']['count'] = 1;
                     
                     // let smsCode = await SendSms_With_Kavehnegar(data['Auth']['mobileNumber']);
-                    let smsCode = 1;
-                    data['Auth']['smsCode'] = 'smsCode';
+                    let smsCode = 12345;
+                    data['Auth']['smsCode'] = smsCode;
                     data['Auth']['expiredSmsCode'] = new Date().getTime() + config_expireSmsCode;
                 
                     Create(obj , null).then(result=>{});
@@ -230,7 +230,7 @@ module.exports = {
                             managementGuard:{
                                 id: _find_guard['data'][0]['_id'],
                                 canActivate: true,
-                                expireTime: new Date().getTime() + config_guards['start-register-TO-register']
+                                expireTime: new Date().getTime() + config_guards['start-login-TO-login']
                             }
                          }
                     }
@@ -276,7 +276,7 @@ module.exports = {
                             managementGuard:{
                                 id: _find_guard['data'][0]['_id'],
                                 canActivate: false,
-                                expireTime: new Date().getTime() + config_guards['start-register-TO-register']
+                                expireTime: new Date().getTime() + config_guards['start-login-TO-login']
                             }
                          }
                     }
@@ -314,8 +314,8 @@ module.exports = {
             data['Auth']['ip'] = clientIp;
 
             // let smsCode = await SendSms_With_Kavehnegar(data['Auth']['mobileNumber']);
-            let smsCode = 1;
-            data['Auth']['smsCode'] = 'smsCode';
+            let smsCode = 12345;
+            data['Auth']['smsCode'] = smsCode;
             data['Auth']['expiredSmsCode'] = new Date().getTime() + config_expireSmsCode;
 
             Create(data , null).then(result=>{});

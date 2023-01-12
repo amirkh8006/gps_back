@@ -85,9 +85,9 @@ module.exports = {
 
         // ================== REGISTER ==================
 
-        io_socket.on("register", data => {  
+        io_socket.on("start-login", data => {  
          userRegister(data ,clientIp , clientPort).then(dt=>{
-                io_socket.emit('register' ,dt);
+                io_socket.emit('start-login' ,dt);
             });
         });
 
