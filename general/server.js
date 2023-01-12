@@ -1,10 +1,8 @@
-var net = require('net');
-const server = net.createServer(); 
 const app = require('express')();
 const http = require('http').Server(app);
 const io = require('socket.io')(http);
-const {SOCKET_SERVER,TCP_SERVER} = require('./Socket');
-const {port , host} = require('./config');
+const {SOCKET_SERVER} = require('./app/Socket');
+const {port} = require('./config/config');
 
 
 
@@ -79,12 +77,6 @@ io.on("connection", SOCKET_SERVER);
 //     console.log('HA' , handshake);
 //   });
 
-server.on('connection', TCP_SERVER);
-
-
-server.listen(3001, host, () => {
-    console.log('Tcp Server Is Running On Port ' + 3001 + '.');
-});
 
 http.listen(port, () => {
     console.log(`Listening On Port ${port}`);

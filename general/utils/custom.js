@@ -1,9 +1,9 @@
 const {Create , SingleFind} = require('./generator');
 const uniqueRandomRange = require("unique-random-range");
 const util = require('util');
-const {config_ipBlockTime , config_countSendSms , config_expireSmsCode , config_guards, port} = require('./config');
+const {config_ipBlockTime , config_countSendSms , config_expireSmsCode , config_guards, port} = require('../config/config');
 const axios = require('axios');
-var msg = require('./messages');
+var msg = require('../messages');
 // console.log("SINGLE_FIND",util.inspect(x, false, null, true))
 
 var char = ["!", "@", "#", "$", "%", "_", "+", "&", "+", "-"],
