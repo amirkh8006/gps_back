@@ -11,5 +11,5 @@ module.exports = {
     config_guards:{
         "start-login-TO-login": 20 * 1000
     },
-    send_location_inteval_ms: 2000
+    send_location_inteval_ms: 1000
 }

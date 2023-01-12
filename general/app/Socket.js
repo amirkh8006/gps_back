@@ -7,7 +7,8 @@ const {
     SendSms_With_Kavehnegar,
     test123,
     userRegister,
-    decode , encode
+    decode,
+    encode
 } = require('../utils/custom');
 const {
     ObjectID
@@ -51,28 +52,32 @@ module.exports = {
 
         // ================== start-login ===================
 
-        
 
-         // ================== login ==================
 
-         io_socket.on("login", _findData => {  
-            SingleFind(_findData , null).then(result=>{
-                
+        // ================== login ==================
+
+        io_socket.on("login", _findData => {
+            SingleFind(_findData, null).then(result => {
+
                 let mobileNumber = _findData['fields']['mobileNumber'];
                 let expiredLogin = new Date().getTime() + config.config_ExpiredLogin;
-                jsonForDecode = {mobileNumber:mobileNumber,expiredLogin:expiredLogin,uid:null};
+                jsonForDecode = {
+                    mobileNumber: mobileNumber,
+                    expiredLogin: expiredLogin,
+                    uid: null
+                };
                 let token = decode(jsonForDecode);
                 let obj = result;
                 console.log(result);
                 obj['token'] = token;
 
-                io_socket.emit('login' , obj);
+                io_socket.emit('login', obj);
             });
         });
-   
+
         // ================== login ===================
 
-        
+
 
 
         // ================== Public CREATE ==================
@@ -134,10 +139,26 @@ module.exports = {
             //     console.log('LOG', e);
             // })
 
-            interval = setInterval(() => {
-                // 1. Find Online User UID (From data) (Get LocalStorage) 
-                // 2. Find UID From Database Json Result Location
-                io_socket.emit('location', "YA HAGH !");
+
+
+
+
+            interval = setInterval(async () => {
+                let collectionFilter = {
+                    collectionName: "location",
+                    fields: {
+                        uid: data.uid
+                    }
+                }
+
+                let result = await SingleFind(collectionFilter, null);
+
+
+                io_socket.emit('get-location', {
+                    result: result
+                });
+                //     // 1. Find Online User UID (From data) (Get LocalStorage) 
+                //     // 2. Find UID From Database Json Result Location
             }, config.send_location_inteval_ms);
 
 
