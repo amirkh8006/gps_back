@@ -36,7 +36,7 @@ module.exports = {
         var clientIp = io_socket.request.connection.remoteAddress;
         var clientPort = io_socket.request.connection.remotePort;
 
-        console.log(`Socket ${io_socket.id} has connected`);
+        console.log(`Socket ${socketId} has connected`);
         // SendSms_With_Kavehnegar(clientIp , '' , '');
 
         // userRegister(io_socket ,  )
@@ -123,25 +123,10 @@ module.exports = {
 
 
 
-        let interval;
+        var interval;
         // send location to client
-        io_socket.on("get-location", data => {
-
-
-            console.log("SEND LOCATION DATA", data);
-            // io_socket.use(()=>{
-            //     console.log('ABC123');
-            // });
-
-            // Create(data, null).then((dt) => {
-            //     io_socket.emit('location', dt);
-            // }).catch((e) => {
-            //     console.log('LOG', e);
-            // })
-
-
-
-
+        io_socket.on("get-location", (data) => {
+            
 
             interval = setInterval(async () => {
                 let collectionFilter = {
@@ -153,10 +138,10 @@ module.exports = {
 
                 let result = await SingleFind(collectionFilter, null);
 
-
-                io_socket.emit('get-location', {
+                io_socket.emit(`send-location`, {
                     result: result
                 });
+
                 //     // 1. Find Online User UID (From data) (Get LocalStorage) 
                 //     // 2. Find UID From Database Json Result Location
             }, config.send_location_inteval_ms);
