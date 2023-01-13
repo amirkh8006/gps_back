@@ -39,7 +39,7 @@ module.exports = {
         var clientIp = io_socket.request.connection.remoteAddress;
         var clientPort = io_socket.request.connection.remotePort;
 
-        console.log(`Socket ${io_socket.id} has connected`);
+        console.log(`Socket ${socketId} has connected`);
         // SendSms_With_Kavehnegar(clientIp , '' , '');
 
         // userRegister(io_socket ,  )
@@ -55,9 +55,7 @@ module.exports = {
 
         // ================== start-login ===================
 
-        
 
-         // ================== login ==================
 
          io_socket.on("login", async _findData => {  
             //  console.log('F' , _findData);
@@ -121,7 +119,7 @@ module.exports = {
         
 
         });
-   
+
         // ================== login ===================
 
         
@@ -230,26 +228,27 @@ module.exports = {
 
 
 
-        let interval;
+        var interval;
         // send location to client
-        io_socket.on("get-location", data => {
+        io_socket.on("get-location", (data) => {
+            
 
+            interval = setInterval(async () => {
+                let collectionFilter = {
+                    collectionName: "location",
+                    fields: {
+                        uid: data.uid
+                    }
+                }
 
-            console.log("SEND LOCATION DATA", data);
-            // io_socket.use(()=>{
-            //     console.log('ABC123');
-            // });
+                let result = await SingleFind(collectionFilter, null);
 
-            // Create(data, null).then((dt) => {
-            //     io_socket.emit('location', dt);
-            // }).catch((e) => {
-            //     console.log('LOG', e);
-            // })
+                io_socket.emit(`send-location`, {
+                    result: result
+                });
 
-            interval = setInterval(() => {
-                // 1. Find Online User UID (From data) (Get LocalStorage) 
-                // 2. Find UID From Database Json Result Location
-                io_socket.emit('location', "YA HAGH !");
+                //     // 1. Find Online User UID (From data) (Get LocalStorage) 
+                //     // 2. Find UID From Database Json Result Location
             }, config.send_location_inteval_ms);
 
 

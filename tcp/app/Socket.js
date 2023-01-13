@@ -1,3 +1,7 @@
+const {
+    Create,
+    SingleFind
+} = require('../utils/generator');
 
 module.exports = {
 
@@ -19,7 +23,64 @@ module.exports = {
 
                 //the json is ok
                 let json = JSON.parse(str);
+
                 console.log('JSON OK', json);
+
+                let {
+                    uid,
+                    pn1,
+                    pn2,
+                    pn3,
+                    rly,
+                    inp,
+                    lgt,
+                    lat,
+                    sp,
+                    bp,
+                    td,
+                    cs,
+                    dc,
+                    ns,
+                    fs,
+                    gf,
+                    gfs,
+                    sv,
+                    ft,
+                    ed,
+                    lp,
+                } = json
+
+                let createData = {
+                    location: {
+                        id: null,
+                        uid: uid,
+                        pn1: pn1,
+                        pn2: pn2,
+                        pn3: pn3,
+                        rly: rly,
+                        inp: inp,
+                        lgt: lgt,
+                        lat: lat,
+                        sp: sp,
+                        bp: bp,
+                        td: td,
+                        cs: cs,
+                        dc: dc,
+                        ns: ns,
+                        fs: fs,
+                        gf: gf,
+                        gfs: gfs,
+                        sv: sv,
+                        ft: ft,
+                        ed: ed,
+                        lp: lp,
+                    }
+                }
+
+
+                Create(createData, null).then(result => {
+                    console.log("DATA CREATED" , result);
+                });
 
             } else {
 
