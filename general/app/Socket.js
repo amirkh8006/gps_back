@@ -1,19 +1,23 @@
 const {
     Create,
-    SingleFind
+    SingleFind,
+    MultipleFindArray
 } = require('../utils/generator');
+var util = require('util');
+
 const {
     login,
     SendSms_With_Kavehnegar,
     test123,
     userRegister,
-    decode , encode
+    decode , encode , existsAccount
 } = require('../utils/custom');
 const {
     ObjectID
 } = require('bson');
 const config = require('../config/config');
-
+var isJSON = require('is-json');
+var msg = require('../messages');
 module.exports = {
 
     SOCKET_SERVER(io_socket) {
@@ -55,22 +59,119 @@ module.exports = {
 
          // ================== login ==================
 
-         io_socket.on("login", _findData => {  
-            SingleFind(_findData , null).then(result=>{
-                
-                let mobileNumber = _findData['fields']['mobileNumber'];
-                let expiredLogin = new Date().getTime() + config.config_ExpiredLogin;
-                jsonForDecode = {mobileNumber:mobileNumber,expiredLogin:expiredLogin,uid:null};
-                let token = decode(jsonForDecode);
-                let obj = result;
-                console.log(result);
-                obj['token'] = token;
+         io_socket.on("login", async _findData => {  
+            //  console.log('F' , _findData);
+             let filters = [];
+             let _filter_account= {
+                collectionName:"Account",
+                fields:{
+                    mobileNumber: _findData['fields']['mobileNumber']
+                }
+           }
+           filters.push(_findData);
+           filters.push(_filter_account);
+        //    console.log('FILTERS' , filters);
+        let find  = await MultipleFindArray(filters);
+       
+        
+        // for (let i = 0; i < find['data'].length; i++) {
+        //     const element = find['data'][i];
+        //     console.log(util.inspect(element, false, null, true /* enable colors */));
+            
+        // }
 
-                io_socket.emit('login' , obj);
-            });
+
+
+
+
+
+             
+                let mobileNumber = _findData['fields']['mobileNumber'];
+                // console.log('RES' , result);
+            
+                
+               
+                if (mobileNumber != null) {
+
+                    let expiredLogin = new Date().getTime() + config.config_ExpiredLogin;
+                    let jsonForEncode = {mobileNumber:mobileNumber,expiredLogin:expiredLogin,uid:null};
+                    let str_jsonEncode = JSON.stringify(jsonForEncode);
+                    let token = encode(str_jsonEncode);
+                    find['data'][0]['Auth'][0]['token'] = token;
+                    // login_obj['token'] = token;
+                }else{
+                    find['data'][0]['Auth'][0]['token'] = null
+                }
+              
+
+                // console.log(util.inspect(find, false, null, true /* enable colors */));
+
+                // login_obj['data'][0]['account'] = user['data'];                
+
+                // console.log('USER' , user);
+                // obj['data'][0]['account'] = user;
+                // console.log('OBJ_final',result);
+                // console.log('object_final' , object_final);
+
+                io_socket.emit('login' , find);
+              
+         
+
+           
+        
+
         });
    
         // ================== login ===================
+
+        
+         // ================== loggedIn User ==================
+
+         io_socket.on("loggedIn", _findData => {
+            let obj = {};
+            let decode_Json = decode(_findData['fields']['token']);
+            let isJson = isJSON(decode_Json);
+           
+            if (isJson == true) {
+                let json = JSON.parse(decode_Json);
+                let mobile = json['mobileNumber'];
+                let expiredLogin = json['expiredLogin'];
+                let currentTime = new Date().getTime();
+
+                if (expiredLogin > currentTime) {
+
+                    obj['mobileNumber'] = mobile;
+                    obj['isLoggedIn'] = true;
+
+                    msg.RESULT_MSG["status"] = 200;
+                    msg.RESULT_MSG["data"] = [obj] ;
+                    msg.RESULT_MSG["message"] = [{SUCCESS:'اطلاعات یافت شد'}];
+                    msg.RESULT_MSG["exeption"] = [];
+
+                   
+                }else{
+                    obj['mobileNumber'] = mobile;
+                    obj['isLoggedIn'] = false;
+    
+                    msg.RESULT_MSG["status"] = 200;
+                    msg.RESULT_MSG["data"] = [obj] ;
+                    msg.RESULT_MSG["message"] = [{SUCCESS:'مدت اعتبار احراز هویت شما به پایان رسیده است لطفا مجددا وارد شوید'}];
+                    msg.RESULT_MSG["exeption"] = [];
+                }
+                
+            }else{
+                    obj['mobileNumber'] = 0;
+                    obj['isLoggedIn'] = false;
+                    msg.RESULT_MSG["status"] = 100;
+                    msg.RESULT_MSG["data"] = [obj] ;
+                    msg.RESULT_MSG["message"] = [{SUCCESS:'توکن ارسال شده معتبر نیست'}];
+                    msg.RESULT_MSG["exeption"] = [];
+            }
+            io_socket.emit('loggedIn' , msg.RESULT_MSG);
+
+        });
+   
+        // ================== loggedIn User ===================
 
         
 
@@ -114,6 +215,17 @@ module.exports = {
 
         // ================ AUTH ========================
 
+        // io_socket.on("test123", data => {
+        //     // console.log('d');
+
+        //     setInterval(() => {
+        //         // 1. Find Online User UID (From data) (Get LocalStorage) 
+        //         // 2. Find UID From Database Json Result Location
+        //         io_socket.emit('test123', "YA HAGH !");
+        //     }, 1000);
+
+
+        // });
 
 
 

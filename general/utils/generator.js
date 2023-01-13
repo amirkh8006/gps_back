@@ -5,6 +5,7 @@ const {databaseName , uri} = require('../config/config');
 const client = new MongoClient(uri);
 const db = client.db(databaseName);
 var msg = require('../messages');
+var util = require('util');
 // const Redis = require("ioredis");
 // const redis = new Redis();
 
@@ -822,6 +823,67 @@ module.exports = {
         }
         return msg.RESULT_MSG;
        
+    },
+
+    async MultipleFindArray(filters){
+
+        /*
+            let filters = [
+    {
+            collectionName:"Auth",
+            fields:{
+                mobileNumber:"09351371050"
+            }
+    },
+    {
+        collectionName:"account",
+        fields:{
+            Name:"123"
+        }
+}
+];
+        
+        */
+        if (typeof(filters) == "object") {
+
+           let obj_final = [];
+            for (let i = 0; i < filters.length; i++) {
+                const item = filters[i];
+                let collectionName = item['collectionName'];
+                let collectionTitle = await db.collection(collectionName);
+                let fields = item['fields'];
+                var dt  = await collectionTitle.find(fields).toArray();
+                let item_obj = {[collectionName]: dt}
+                obj_final.push(item_obj);
+            }
+
+                msg.RESULT_MSG["status"] = 200;
+                msg.RESULT_MSG["data"] = obj_final;
+                msg.RESULT_MSG["message"] = ["اطلاعات با موفقیت یافت شد"];
+                msg.RESULT_MSG["exeption"] = [];
+
+        }else{
+            /*
+                 {
+                    status: 500,
+                    data:{},
+                    message:null,
+                    exeption:"مقدار ورودی یا همان فیلتر از نوع آبجکت نمی باشد"
+                }
+            */
+
+                msg.RESULT_MSG["status"] = 500;
+                msg.RESULT_MSG["data"].push({Message:'filter Invalid'});
+                msg.RESULT_MSG["message"] = [];
+                msg.RESULT_MSG["exeption"] = ["مقدار ورودی یا همان فیلتر از نوع آبجکت نمی باشد"];
+
+            // msg.INVALID_FILTER["data"] = {Message:'filter Invalid'};
+            // return msg.INVALID_FILTER;
+
+            //  Msg.push({Message:'filter Invalid' , status: 'InvalidFilter'});
+            //  return Msg;
+        }
+        return msg.RESULT_MSG;
     },
     
     async  deleteRecord(deleteObject) {

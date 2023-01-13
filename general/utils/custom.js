@@ -13,6 +13,7 @@ module.exports = {
 
     encode(r)
     {
+        // console.log('DDDDDDDDDD');
         if (!(r && 0 < r.length)) return "";
             for (var e, t = "", a = Math.floor(26 * Math.random()), n = a, o = 0; o < r.length; o++)
             {
@@ -24,8 +25,8 @@ module.exports = {
             return t.substr(0, Math.floor(t.length / 2)) + String.fromCharCode(a + number) + t.substr(Math.floor(t.length / 2))
     },
 
-    decode(r)
-    {
+    decode(r){
+
         var e, t = "",
         a = 0;
         if (!(r && 0 < r.length)) return "";
@@ -51,7 +52,8 @@ module.exports = {
             }
             var u = 26 * a + e - number;
             t += String.fromCharCode(u - n), n = u % 26
-        } return t
+        }
+        return t
     },
 
     async login(userName , password){
@@ -421,6 +423,38 @@ module.exports = {
     return await msg.RESULT_MSG_Auth;
 
     },
+
+    async existsAccount(mobileNumber){
+
+        let _filter_account= {
+            collectionName:"Account",
+            fields:{
+                mobileNumber: mobileNumber
+            }
+       }
+
+       let _find = await SingleFind(_filter_account);
+
+       if (_find['data'].length > 0) {
+           // User Exists
+
+           msg.RESULT_MSG_Auth["status"] = 200;
+           msg.RESULT_MSG_Auth["data"] = _find['data'];
+           msg.RESULT_MSG_Auth["message"].push({SUCCESS:'اطلاعات کاربری فوق یافت شد'});
+           msg.RESULT_MSG_Auth["exeption"] = [];
+
+       }else{
+           // User Not Exists
+
+           msg.RESULT_MSG_Auth["status"] = 100;
+           msg.RESULT_MSG_Auth["data"] = [];
+           msg.RESULT_MSG_Auth["message"] = [{SUCCESS:'کاربری با این مشخصات یافت نشد'}];
+           msg.RESULT_MSG_Auth["exeption"] = [];
+       }
+
+       return msg.RESULT_MSG_Auth;
+
+    }
 
     // async managementGuard(data , clientIp , clientPort){
 
