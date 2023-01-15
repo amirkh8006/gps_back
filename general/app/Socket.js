@@ -1,3 +1,11 @@
+const uniqueRandomRange = require("unique-random-range");
+const first_word_token = '/*Antidisestablishmentarianism*/#/$Otorhinolaryngologist$/'
+const last_word_token = '/*Supercalifragilisticexpialidocious*/#/$Heterogeneous$/'
+const Encodr = require('encodr');
+// import Encodr from "encodr"
+
+
+
 const {
     Create,
     SingleFind,
@@ -10,7 +18,7 @@ const {
     SendSms_With_Kavehnegar,
     test123,
     userRegister,
-    decode , encode , existsAccount
+    decode , encode , SendSms_With_Body_Kavehnegar
 } = require('../utils/custom');
 const {
     ObjectID
@@ -21,6 +29,8 @@ var msg = require('../messages');
 module.exports = {
 
     SOCKET_SERVER(io_socket) {
+
+      
 
 
         // login('' , '' , 'abc' , 60);
@@ -45,9 +55,48 @@ module.exports = {
         // userRegister(io_socket ,  )
         // console.log(`Header : ${io_socket.handshake}`);
 
+
+
+        io_socket.on("sendSms_Kavehnegar", async data => {
+
+            let rand = uniqueRandomRange(1032, 999999);
+            let randomCode = rand();
+            let randCode =  await randomCode;
+            let _filter = {
+                collectionName:"Auth",
+                fields:{
+                    mobileNumber: data['mobileNumber']
+                }
+            }
+        
+            let _find = await SingleFind(_filter);
+            let _find_User = _find['data'][0];
+           
+            if (_find['data'].length > 0) {
+
+                let update_Auth = {
+                    Auth:{
+                        id: _find_User['_id'],
+                        smsCode: randCode,
+                        expiredSmsCode: new Date().getTime() + config.config_expireSmsCode
+                    }
+                }
+                Create(update_Auth , null);
+            }
+            // SendSms_With_Body_Kavehnegar(data['mobileNumber'] , randCode); // zamane publish in khat az comment darbiad
+
+        });
+
+
+
+
         // ================== start-login ===================
 
-        io_socket.on("start-login", data => {
+        io_socket.on("start-login", async data => {
+
+            // let u = new newToken('09351371050');
+            // console.log('u'  ,u);
+
             userRegister(data, clientIp, clientPort).then(dt => {
                 io_socket.emit('start-login', dt);
             });
@@ -57,8 +106,7 @@ module.exports = {
 
 
 
-         io_socket.on("login", async _findData => {  
-            //  console.log('F' , _findData);
+        io_socket.on("login", async _findData => {  
              let filters = [];
              let _filter_account= {
                 collectionName:"Account",
@@ -91,11 +139,11 @@ module.exports = {
                
                 if (mobileNumber != null) {
 
-                    let expiredLogin = new Date().getTime() + config.config_ExpiredLogin;
-                    let jsonForEncode = {mobileNumber:mobileNumber,expiredLogin:expiredLogin,uid:null};
-                    let str_jsonEncode = JSON.stringify(jsonForEncode);
-                    let token = encode(str_jsonEncode);
-                    find['data'][0]['Auth'][0]['token'] = token;
+                    // let expiredLogin = new Date().getTime() + config.config_ExpiredLogin;
+                    // let jsonForEncode = {mobileNumber:mobileNumber,expiredLogin:expiredLogin,uid:null};
+                    // let str_jsonEncode = JSON.stringify(jsonForEncode);
+                    // let token = encode(str_jsonEncode);
+                    find['data'][0]['Auth'][0]['token'] = await newToken(mobileNumber);
                     // login_obj['token'] = token;
                 }else{
                     find['data'][0]['Auth'][0]['token'] = null
@@ -109,7 +157,7 @@ module.exports = {
                 // console.log('USER' , user);
                 // obj['data'][0]['account'] = user;
                 // console.log('OBJ_final',result);
-                // console.log('object_final' , object_final);
+                // console.log('object_final' , find);
 
                 io_socket.emit('login' , find);
               
@@ -120,12 +168,13 @@ module.exports = {
 
         });
 
+
         // ================== login ===================
 
         
-         // ================== loggedIn User ==================
+         // ================== Guard Management ==================
 
-         io_socket.on("loggedIn", _findData => {
+         io_socket.on("G-loggedIn", _findData => {
             let obj = {};
             let decode_Json = decode(_findData['fields']['token']);
             let isJson = isJSON(decode_Json);
@@ -165,13 +214,98 @@ module.exports = {
                     msg.RESULT_MSG["message"] = [{SUCCESS:'توکن ارسال شده معتبر نیست'}];
                     msg.RESULT_MSG["exeption"] = [];
             }
-            io_socket.emit('loggedIn' , msg.RESULT_MSG);
+            io_socket.emit('G-loggedIn' , msg.RESULT_MSG);
+
+         });
+
+        io_socket.on("G-create-account", async _findData => {
+            let obj = {};
+            let decode_Json = decode(_findData['fields']['token']);
+            let isJson = isJSON(decode_Json);
+           
+            if (isJson == true) {
+
+                let json = JSON.parse(decode_Json);
+                let mobile = json['mobileNumber'];
+
+                let _filter_account= {
+                    collectionName:"Account",
+                    fields:{
+                        mobileNumber: mobile
+                    }
+               }
+                let find_account = await  SingleFind(_filter_account);
+
+                if (find_account['data'].length > 0) {
+
+                    let _data_db = find_account['data'];
+                    msg.RESULT_MSG["status"] = 200;
+                    msg.RESULT_MSG["data"] = _data_db ;
+                    msg.RESULT_MSG["message"] = [{SUCCESS:'اطلاعات با موفقیت یافت شد'}];
+                    msg.RESULT_MSG["exeption"] = [];
+
+                }
+                else{
+                    msg.RESULT_MSG["status"] = 200;
+                    msg.RESULT_MSG["data"] = [] ;
+                    msg.RESULT_MSG["message"] = [{SUCCESS:'اطلاعاتی یافت نشد'}];
+                    msg.RESULT_MSG["exeption"] = [];
+                }
+            }
+            else{
+
+                    msg.RESULT_MSG["status"] = 100;
+                    msg.RESULT_MSG["data"] = [obj] ;
+                    msg.RESULT_MSG["message"] = [{SUCCESS:'توکن ارسال شده معتبر نیست'}];
+                    msg.RESULT_MSG["exeption"] = [];
+            }
+            io_socket.emit('G-create-account' , msg.RESULT_MSG);
 
         });
+
    
-        // ================== loggedIn User ===================
+        // ================== Guard Management ===================
 
         
+        // ================== Create Account ==================
+
+        /*
+
+    {
+        "Account": {
+            "constPassword": "aaaaa",
+            "retryconstPassword": "aaaaa",
+            "id": null,
+            "mobileNumber": "09351371050",
+            "uid": null,
+            "firstName": null,
+            "lastName": null,
+            "vehicleInfo": [],
+            "state": null,
+            "city": null,
+            "isActive": true
+        }
+    }
+        
+        */
+
+        io_socket.on("create-Account", async data => {
+            if(data['Account']['id'] == null){
+                data['Account']['expiredAccount'] = new Date().getTime() + config.config_ExpiredAccount;
+            }else{
+                data['Account']['expiredTimeconstpassword'] = new Date().getTime() + config.config_ExpiredTimeCosnstPassword
+            }
+            
+            // console.log(data);
+            Create(data, null).then(result => {
+                result['data'][0]['Account']['token'] =  newToken(data['Account']['mobileNumber']);
+                io_socket.emit('create-Account', result);
+            });
+        });
+
+        // ================== Create Account ==================
+
+
 
 
         // ================== Public CREATE ==================
@@ -260,4 +394,100 @@ module.exports = {
         });
 
     }
+
+
+}
+
+async function newToken(mobileNumber){
+
+    let _filter_Auth = {
+        collectionName:"Auth",
+        fields:{
+            mobileNumber: mobileNumber
+        }
+   }
+
+   let findUser = await SingleFind(_filter_Auth);
+
+    let expiredLogin = new Date().getTime() + config.config_ExpiredLogin;
+    let jsonForEncode = {obj:findUser['data'][0]['_id'],expiredLogin:expiredLogin,uid:null};
+    let str_jsonEncode = JSON.stringify(jsonForEncode);
+    let encode_1 = encode(str_jsonEncode);
+
+    // const MSGPACK = new Encodr("msgpack")
+
+    // let data = encode_1
+
+    // data = MSGPACK.encode(data)
+    // data = MSGPACK.decode(data)
+    // let token = MSGPACK.encode(data)
+    return encode_1;
+
+    // let expiredLogin = new Date().getTime() + config.config_ExpiredLogin;
+    // let jsonForEncode = {obj:findUser['data'][0]['_id'],expiredLogin:expiredLogin,uid:null};
+    // let str_jsonEncode = JSON.stringify(jsonForEncode);
+
+    // let token = encode(str_jsonEncode);
+    // return  token;
+
+    // let expiredLogin = new Date().getTime() + config.config_ExpiredLogin;
+    // let jsonForEncode = {mobileNumber:mobileNumber,expiredLogin:expiredLogin,uid:null};
+    // let str_jsonEncode = JSON.stringify(jsonForEncode);
+    // let token = encode(str_jsonEncode);
+    // return  token;
+}
+
+ async function newToken2(mobileNumber , type){
+    let result = 0;
+    let _filter_Auth = {
+        collectionName:"Auth",
+        fields:{
+            mobileNumber: mobileNumber
+        }
+   }
+
+   let findUser = await SingleFind(_filter_Auth);
+
+    let expiredLogin = new Date().getTime() + config.config_ExpiredLogin;
+    let jsonForEncode = {obj:findUser['data'][0]['_id'],expiredLogin:expiredLogin,uid:null};
+    let str_jsonEncode = JSON.stringify(jsonForEncode);
+
+    let encode_1 = encode(str_jsonEncode);
+
+    const MSGPACK = new Encodr("msgpack")
+
+    let data = encode_1
+
+    data = MSGPACK.encode(data)
+    data = MSGPACK.decode(data);
+    let _encodeToken = MSGPACK.encode(data);
+    
+    let _decodeToken = decodeToken(_encodeToken);
+    // console.log( typeof(MSGPACK.encode(data)))
+
+    // console.log('enc' , _encodeToken);
+    // console.log('dec' , dec);
+
+   if (type == 1) {
+       // return token encode
+       result = await _encodeToken;
+   }else if(type == 2){
+       result =  await _decodeToken;
+   }
+
+   return await result;
+    // console.log('token',token);
+
+    // let dec = decode(token);
+    // console.log('decode' , dec);
+    // return  token;
+}
+
+function decodeToken(token){
+    const MSGPACK = new Encodr("msgpack");
+    let decode_msgpack = MSGPACK.decode(token);
+    let decode_final = decode(decode_msgpack);
+    // console.log('dec' , deco);
+    return decode_final;
+    // console.log('DEC' , decode_final);
 }

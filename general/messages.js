@@ -10,6 +10,12 @@ Return Message Sample !
 
 */
  // 
+ MULTIPLE_RESULT_MSG = {
+    status: 0,
+    data:[],
+    message:[], 
+    exeption:[]
+ }
 
 RESULT_MSG = {
     status: 100,
@@ -142,5 +148,6 @@ module.exports = {
      SUCCESS_FIND,
      SUCCESS_NOTFOUND_RECORD,
      RESULT_MSG,
-     RESULT_MSG_Auth
+     RESULT_MSG_Auth,
+     MULTIPLE_RESULT_MSG
 }

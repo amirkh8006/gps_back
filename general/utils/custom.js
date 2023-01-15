@@ -454,13 +454,44 @@ module.exports = {
 
        return msg.RESULT_MSG_Auth;
 
+    },
+
+    async SendSms_With_Body_Kavehnegar(mobileNumber , message){
+
+        try {
+    
+            var theUrl = "https://api.kavenegar.com/v1/" + "67704F2F46716770477463724E41756137746B645541512F6C4A312B6A354542";
+            theUrl += "/verify/lookup.json?receptor=" + mobileNumber;
+            theUrl += "&token=" + message + "&template=VerifyTokens";
+    
+            const request = axios.create({
+                method: 'get',
+                baseURL: theUrl,
+                headers: {
+                'Content-Type': 'application/json'
+                }
+            })
+    
+            await request.get().catch(err => {
+                console.log("ERROR" , err.response.data);
+            
+            });
+            
+        }catch (error) {
+            
+            console.log('ERROR' , error);
+        }
+
     }
+    
+
 
     // async managementGuard(data , clientIp , clientPort){
 
     // }
     
 }
+
 
 
 async function SendSms_With_Kavehnegar(mobileNumber){
@@ -495,4 +526,5 @@ async function SendSms_With_Kavehnegar(mobileNumber){
     return randCode;
    
 }
+
 

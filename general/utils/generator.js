@@ -857,10 +857,10 @@ module.exports = {
                 obj_final.push(item_obj);
             }
 
-                msg.RESULT_MSG["status"] = 200;
-                msg.RESULT_MSG["data"] = obj_final;
-                msg.RESULT_MSG["message"] = ["اطلاعات با موفقیت یافت شد"];
-                msg.RESULT_MSG["exeption"] = [];
+                msg.MULTIPLE_RESULT_MSG["status"] = 200;
+                msg.MULTIPLE_RESULT_MSG["data"] = obj_final;
+                msg.MULTIPLE_RESULT_MSG["message"] = ["اطلاعات با موفقیت یافت شد"];
+                msg.MULTIPLE_RESULT_MSG["exeption"] = [];
 
         }else{
             /*
@@ -872,10 +872,10 @@ module.exports = {
                 }
             */
 
-                msg.RESULT_MSG["status"] = 500;
-                msg.RESULT_MSG["data"].push({Message:'filter Invalid'});
-                msg.RESULT_MSG["message"] = [];
-                msg.RESULT_MSG["exeption"] = ["مقدار ورودی یا همان فیلتر از نوع آبجکت نمی باشد"];
+                msg.MULTIPLE_RESULT_MSG["status"] = 500;
+                msg.MULTIPLE_RESULT_MSG["data"].push({Message:'filter Invalid'});
+                msg.MULTIPLE_RESULT_MSG["message"] = [];
+                msg.MULTIPLE_RESULT_MSG["exeption"] = ["مقدار ورودی یا همان فیلتر از نوع آبجکت نمی باشد"];
 
             // msg.INVALID_FILTER["data"] = {Message:'filter Invalid'};
             // return msg.INVALID_FILTER;
@@ -883,7 +883,7 @@ module.exports = {
             //  Msg.push({Message:'filter Invalid' , status: 'InvalidFilter'});
             //  return Msg;
         }
-        return msg.RESULT_MSG;
+        return msg.MULTIPLE_RESULT_MSG;
     },
     
     async  deleteRecord(deleteObject) {
@@ -1341,6 +1341,8 @@ module.exports = {
     return msg.RESULT_MSG_Auth;
 
     },
+
+    
 
     // async setRedis(key , value){
     //     redis.set(key , value);
