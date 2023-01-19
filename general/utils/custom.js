@@ -66,7 +66,7 @@ module.exports = {
         return dateNow;
     },
 
-    async userRegister(data , clientIp , clientPort){
+    async   userRegister(data , clientIp , clientPort){
         
        
     let jsonGuard = {};
