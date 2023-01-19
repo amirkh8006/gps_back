@@ -3,6 +3,9 @@ const {
     SingleFind
 } = require('../utils/generator');
 
+var isJSON = require('is-json');
+
+
 module.exports = {
 
     TCP_SERVER(tcp_socket) {
@@ -11,82 +14,157 @@ module.exports = {
 
         sockets = [];
         // tcp_socket.setEncoding('UTF-8');
-        tcp_socket.on('data', function (data) {
+        tcp_socket.on('data', async function (data) {
 
             // 1. Read data And Save To  Database .
             // console.log('DATA_FUN' , data.toString());
             // 2. send to Client json MC60
 
-            let str = data.toString('utf8');
 
-            if (/^[\],:{}\s]*$/.test(str.replace(/\\["\\\/bfnrtu]/g, '@').replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g, ']').replace(/(?:^|:|,)(?:\s*\[)+/g, ''))) {
+            // let sample = {
+            //     "uid": "1234",
+            //     "pn1": "09383102777",
+            //     "pn2": "09351371050",
+            //     "pn3": "09351234569",
+            //     "rly": "0001",
+            //     "inp": "1001",
+            //     "lat": "23.556487",
+            //     "lgt": "52.145879",
+            //     "sp": "70",
+            //     "bp": "45",
+            //     "td": "10",
+            //     "cs": "1",
+            //     "dc": "3",
+            //     "ns": "2",
+            //     "fs": "3",
+            //     "gf": "23.2332*23.12313*41.12313*45.123132",
+            //     "gfs": "1",
+            //     "sv": "3.1.6",
+            //     "ft": "0",
+            //     "ed": "0",
+            //     "lp": "80"
+            // }
 
-                //the json is ok
-                let json = JSON.parse(str);
 
-                console.log('JSON OK', json);
 
-                let {
-                    uid,
-                    pn1,
-                    pn2,
-                    pn3,
-                    rly,
-                    inp,
-                    lgt,
-                    lat,
-                    sp,
-                    bp,
-                    td,
-                    cs,
-                    dc,
-                    ns,
-                    fs,
-                    gf,
-                    gfs,
-                    sv,
-                    ft,
-                    ed,
-                    lp,
-                } = json
+            let stringData = data.toString('utf8').trim();
+            let isJson = isJSON(stringData);
 
-                let createData = {
-                    location: {
-                        id: null,
-                        uid: uid,
-                        pn1: pn1,
-                        pn2: pn2,
-                        pn3: pn3,
-                        rly: rly,
-                        inp: inp,
-                        lgt: lgt,
-                        lat: lat,
-                        sp: sp,
-                        bp: bp,
-                        td: td,
-                        cs: cs,
-                        dc: dc,
-                        ns: ns,
-                        fs: fs,
-                        gf: gf,
-                        gfs: gfs,
-                        sv: sv,
-                        ft: ft,
-                        ed: ed,
-                        lp: lp,
-                    }
+            if (isJson) {
+            let parsedData = JSON.parse(stringData)
+
+            let {
+                uid,
+                pn1,
+                pn2,
+                pn3,
+                rly,
+                inp,
+                lgt,
+                lat,
+                sp,
+                bp,
+                td,
+                cs,
+                dc,
+                ns,
+                fs,
+                gf,
+                gfs,
+                sv,
+                ft,
+                ed,
+                lp,
+            } = parsedData
+
+
+            let collectionFilter = {
+                collectionName: "location",
+                fields: {
+                    uid: uid
                 }
+            }
 
+            let result = await SingleFind(collectionFilter, null);
 
-                Create(createData, null).then(result => {
-                    console.log("DATA CREATED" , result);
-                });
+            let collectionData = {
+                location: {
+                    uid: uid,
+                    pn1: pn1,
+                    pn2: pn2,
+                    pn3: pn3,
+                    rly: rly,
+                    inp: inp,
+                    location: {
+                        type: "Point",
+                        coordinates: [Number(lat), Number(lgt)]
+                    },
+                    sp: sp,
+                    bp: bp,
+                    td: td,
+                    cs: cs,
+                    dc: dc,
+                    ns: ns,
+                    fs: fs,
+                    gf: gf,
+                    gfs: gfs,
+                    sv: sv,
+                    ft: ft,
+                    ed: ed,
+                    lp: lp
+                }
+            }
+
+            if (result.data.length > 0) {
+
+                collectionData.location["id"] = result.data[0]._id;
 
             } else {
+                collectionData.location["id"] = null;
+            }
 
-                //the json is not ok
+            let resultCreate = await Create(collectionData, null)
+            console.log("RESULT" , resultCreate);
+
+
+            tcp_socket.write("SEND");
+            tcp_socket.end();
+
+            let createLogData = {
+                locationLog: {
+                    id: null,
+                    uid: uid,
+                    pn1: pn1,
+                    pn2: pn2,
+                    pn3: pn3,
+                    rly: rly,
+                    inp: inp,
+                    location: {
+                        type: "Point",
+                        coordinates: [Number(lat), Number(lgt)]
+                    },
+                    sp: sp,
+                    bp: bp,
+                    td: td,
+                    cs: cs,
+                    dc: dc,
+                    ns: ns,
+                    fs: fs,
+                    gf: gf,
+                    gfs: gfs,
+                    sv: sv,
+                    ft: ft,
+                    ed: ed,
+                    lp: lp,
+                }
+            }
+
+
+            let createdLogResult = await Create(createLogData, null)
+            console.log("DATA LOG CREATED", createdLogResult);
+
+            } else {
                 console.log('JSON NOT OK');
-
             }
 
             // let json = JSON.parse(str);
@@ -98,9 +176,6 @@ module.exports = {
 
             // let str2 = JSON.stringify(obj, null, 4); // Reverse conversion
             // console.log("Obj = %s", str2);           // and output to inspect
-
-            tcp_socket.write("SEND");
-            tcp_socket.end();
 
         });
 
