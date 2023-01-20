@@ -1,28 +1,92 @@
 const {Create , MultipleFindArray} = require('./utils/generator');
 var isJSON = require('is-json');
-const {encode , decode} = require('./utils/custom');
+// const {encode , decode} = require('./utils/custom');
 var util = require('util');
 
-let filters = [
-    {
-            collectionName:"Auth",
-            fields:{
-                mobileNumber:"09351371050"
-            }
-    },
-    {
-        collectionName:"account",
-        fields:{
-            Name:"123"
-        }
+var msgpack = require('msgpack5')() // namespace our extensions
+  , encode  = msgpack.encode
+  , decode  = msgpack.decode
+
+// msgpack.register(0x42, MyType, mytipeEncode, mytipeDecode)
+
+let value = {a : 1 , Name: 'Mohammad Khojasteh !'}
+
+
+function encode_M(jsonValue) {
+   return encode(jsonValue).toString('hex');
 }
-];
 
-let res = MultipleFindArray(filters).then(x=>{
-    console.log(util.inspect(x, false, null, true /* enable colors */))
+function decode_M(token) {
+    return decode(encode(token));
+}
+
+var msgpack = require('msgpack-typed-numbers');
+
+  function encodeDate(date) {
+    return msgpack.encode(+date);
+  }
+
+  function decodeDate(uint8array) {
+    return new Date(msgpack.decode(uint8array));
+  }
+
+//   console.log('enc' , encodeDate('1'))
+//   console.log('enc' , decodeDate(Uint8Array(1) [ 1 ]))
 
 
-})
+
+
+
+
+function encodeToken(value) {
+
+    const Encodr = require('encodr');
+
+    const MSGPACK = new Encodr("msgpack")
+
+    let data = value;
+
+    data = MSGPACK.encode(data)
+    data = MSGPACK.decode(data);
+    let _encodeToken = MSGPACK.encode(data).toString('hex');
+    return _encodeToken;
+}
+
+function decodeToken(token) {
+    const Encodr = require('encodr');
+    const MSGPACK = new Encodr("msgpack")
+    token = MSGPACK.encode(token)
+    token = MSGPACK.decode(token);
+    let _decodeToken = MSGPACK.decode(token);
+    return _decodeToken;
+}
+
+    // let _en = encodeToken('MOHAMMAD');
+    // let _de = decodeToken('a84d4f48414d4d4144');
+    // console.log('enc' , _en);
+    // console.log('dec' , _de);
+
+
+// let filters = [
+//     {
+//             collectionName:"Auth",
+//             fields:{
+//                 mobileNumber:"09351371050"
+//             }
+//     },
+//     {
+//         collectionName:"account",
+//         fields:{
+//             Name:"123"
+//         }
+// }
+// ];
+
+// let res = MultipleFindArray(filters).then(x=>{
+//     console.log(util.inspect(x, false, null, true /* enable colors */))
+
+
+// })
 
 
 // let j = {a:'123'};

@@ -3,6 +3,7 @@ const first_word_token = '/*Antidisestablishmentarianism*/#/$Otorhinolaryngologi
 const last_word_token = '/*Supercalifragilisticexpialidocious*/#/$Heterogeneous$/'
 const Encodr = require('encodr');
 // import Encodr from "encodr"
+var base64 = require('base-64');
 
 
 
@@ -95,10 +96,6 @@ module.exports = {
         // ================== start-login ===================
 
         io_socket.on("start-login", async data => {
-
-            // let u = new newToken('09351371050');
-            // console.log('u'  ,u);
-
             userRegister(data, clientIp, clientPort).then(dt => {
                 io_socket.emit('start-login', dt);
             });
@@ -140,7 +137,7 @@ module.exports = {
                 
                
                 if (mobileNumber != null) {
-
+                    // console.log('TTT' , await newToken(mobileNumber));
                     // let expiredLogin = new Date().getTime() + config.config_ExpiredLogin;
                     // let jsonForEncode = {mobileNumber:mobileNumber,expiredLogin:expiredLogin,uid:null};
                     // let str_jsonEncode = JSON.stringify(jsonForEncode);
@@ -176,14 +173,14 @@ module.exports = {
         
          // ================== Guard Management ==================
 
-         io_socket.on("G-loggedIn", _findData => {
+         io_socket.on("G-loggedIn", async _findData => {
             let obj = {};
-            let decode_Json = decode(_findData['fields']['token']);
+            let decode_Json = await decodeToken(_findData['fields']['token']);
             let isJson = isJSON(decode_Json);
            
             if (isJson == true) {
                 let json = JSON.parse(decode_Json);
-                let mobile = json['mobileNumber'];
+                let mobile = _findData['fields']['mobileNumber'] // json['mobileNumber'];
                 let expiredLogin = json['expiredLogin'];
                 let currentTime = new Date().getTime();
 
@@ -222,18 +219,17 @@ module.exports = {
 
         io_socket.on("G-create-account", async _findData => {
             let obj = {};
-            let decode_Json = decode(_findData['fields']['token']);
+            let decode_Json = await decodeToken(_findData['fields']['token']);
             let isJson = isJSON(decode_Json);
            
             if (isJson == true) {
 
                 let json = JSON.parse(decode_Json);
-                let mobile = json['mobileNumber'];
-
+                // let mobile = json['mobileNumber'];
                 let _filter_account= {
                     collectionName:"Account",
                     fields:{
-                        mobileNumber: mobile
+                        mobileNumber: _findData['fields']['mobileNumber']
                     }
                }
                 let find_account = await  SingleFind(_filter_account);
@@ -271,38 +267,80 @@ module.exports = {
         
         // ================== Create Account ==================
 
-        /*
 
-    {
-        "Account": {
-            "constPassword": "aaaaa",
-            "retryconstPassword": "aaaaa",
-            "id": null,
-            "mobileNumber": "09351371050",
-            "uid": null,
-            "firstName": null,
-            "lastName": null,
-            "vehicleInfo": [],
-            "state": null,
-            "city": null,
-            "isActive": true
-        }
-    }
-        
-        */
+        io_socket.on("token-info", async _findData => {
+            let obj = {};
+            let decode_Json = await decodeToken(_findData['fields']['token']);
+            let isJson = isJSON(decode_Json);
+           
+            if (isJson == true) {
+
+                let json = JSON.parse(decode_Json);
+               
+
+                let id = json['obj'];
+
+                let _filter_auth= {
+                    collectionName:"Auth",
+                    fields:{
+                        _id: new ObjectID(id)
+                    }
+               }
+                let find_auth = await SingleFind(_filter_auth);
+                if (find_auth['data'].length > 0) {
+
+                    let _data_db = find_auth['data'];
+                    let mobileNumber = _data_db[0]['mobileNumber'];
+
+                    let _filter_account= {
+                        collectionName:"Account",
+                        fields:{
+                            mobileNumber: mobileNumber
+                        }
+                   }
+
+                    let find_Account = await SingleFind(_filter_account);
+                //    console.log(find_Account['data']);
+                    msg.RESULT_MSG["status"] = 200;
+                    msg.RESULT_MSG["data"] = find_Account['data'];
+                    msg.RESULT_MSG["message"] = [{SUCCESS:'اطلاعات با موفقیت یافت شد'}];
+                    msg.RESULT_MSG["exeption"] = [];
+
+                }
+                else{
+                    msg.RESULT_MSG["status"] = 200;
+                    msg.RESULT_MSG["data"] = [] ;
+                    msg.RESULT_MSG["message"] = [{SUCCESS:'اطلاعاتی یافت نشد'}];
+                    msg.RESULT_MSG["exeption"] = [];
+                }
+            }
+            else{
+
+                    msg.RESULT_MSG["status"] = 100;
+                    msg.RESULT_MSG["data"] = [obj] ;
+                    msg.RESULT_MSG["message"] = [{SUCCESS:'توکن ارسال شده معتبر نیست'}];
+                    msg.RESULT_MSG["exeption"] = [];
+            }
+            console.log(msg.RESULT_MSG);
+            io_socket.emit('token-info' , msg.RESULT_MSG);
+
+        });
+
+
 
         io_socket.on("create-Account", async data => {
+           
             if(data['Account']['id'] == null){
                 data['Account']['expiredAccount'] = new Date().getTime() + config.config_ExpiredAccount;
             }else{
                 data['Account']['expiredTimeconstpassword'] = new Date().getTime() + config.config_ExpiredTimeCosnstPassword
             }
             
-            // console.log(data);
-            Create(data, null).then(result => {
-                result['data'][0]['Account']['token'] =  newToken(data['Account']['mobileNumber']);
-                io_socket.emit('create-Account', result);
-            });
+            let result =  await  Create(data, null);
+            let tk = await newToken(data['Account']['mobileNumber']);
+
+            result['data'][0]['token'] = tk;
+            io_socket.emit('create-Account', result);
         });
 
         // ================== Create Account ==================
@@ -424,7 +462,7 @@ module.exports = {
 
 }
 
-async function newToken(mobileNumber){
+async function newToken5(mobileNumber){
 
     let _filter_Auth = {
         collectionName:"Auth",
@@ -509,11 +547,39 @@ async function newToken(mobileNumber){
     // return  token;
 }
 
-function decodeToken(token){
+function decodeToken2(token){
     const MSGPACK = new Encodr("msgpack");
-    let decode_msgpack = MSGPACK.decode(token);
+    // let decode_msgpack = MSGPACK.decode(token);
     let decode_final = decode(decode_msgpack);
     // console.log('dec' , deco);
     return decode_final;
     // console.log('DEC' , decode_final);
+}
+
+async function newToken(mobileNumber){
+
+    let _filter_Auth = {
+        collectionName:"Auth",
+        fields:{
+            mobileNumber: mobileNumber
+        }
+   }
+
+   let findUser = await SingleFind(_filter_Auth);
+
+    let expiredLogin = new Date().getTime() + config.config_ExpiredLogin;
+    let jsonForEncode = {obj:findUser['data'][0]['_id'],expiredLogin:expiredLogin,uid:null};
+    let str_jsonEncode = JSON.stringify(jsonForEncode);
+
+    // console.log('JSON' , jsonForEncode);
+
+    var encodedData_base64 = await base64.encode(str_jsonEncode);
+    var encodeData_en_de = await encode(encodedData_base64);
+    return encodeData_en_de;
+}
+
+async function decodeToken(token) {
+    var decodeData_en_de = await decode(token);
+    var decodedData_base64 = await base64.decode(decodeData_en_de);
+    return decodedData_base64;
 }
