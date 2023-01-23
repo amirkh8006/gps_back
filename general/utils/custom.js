@@ -523,10 +523,11 @@ module.exports = {
     // }
 
     async postRequestNeshan(data) {
-        
+        var theDirectionUrl = "https://api.neshan.org/v4/direction/no-traffic";
+        var theReverseUrl = "https://api.neshan.org/v5/reverse";
+
         if (data.method === "direction&Reverse") {
-            var theDirectionUrl = "https://api.neshan.org/v4/direction/no-traffic";
-            var theReverseUrl = "https://api.neshan.org/v5/reverse";
+
 
 
             const requestDirection = axios.create({
@@ -543,8 +544,8 @@ module.exports = {
                 }
             })
 
-            let direction =  await requestDirection.get().catch(err => {
-                console.log("NESHAN DIRECTION ERROR" , err.data);
+            let direction = await requestDirection.get().catch(err => {
+                console.log("NESHAN DIRECTION ERROR", err.data);
                 return err.data
             });
 
@@ -561,8 +562,8 @@ module.exports = {
                 }
             })
 
-            let reverseOrigin =  await requestReverseOrigin.get().catch(err => {
-                console.log("NESHAN REVERSE ORIGIN ERROR" , err);
+            let reverseOrigin = await requestReverseOrigin.get().catch(err => {
+                console.log("NESHAN REVERSE ORIGIN ERROR", err);
                 return err.data
             });
 
@@ -580,17 +581,42 @@ module.exports = {
                 }
             })
 
-            let reverseDestination =  await requestReverseDestination.get().catch(err => {
-                console.log("NESHAN REVERSE ORIGIN ERROR" , err.data);
+            let reverseDestination = await requestReverseDestination.get().catch(err => {
+                console.log("NESHAN REVERSE ORIGIN ERROR", err.data);
                 return err.data
             });
 
 
-            
+
             let result = {
                 direction: direction.data,
                 reverseOrigin: reverseOrigin.data,
                 reverseDestination: reverseDestination.data
+            }
+
+
+            return result
+        } else if (data.method === "reverse") {
+            const requestReverse = axios.create({
+                method: 'get',
+                baseURL: theReverseUrl,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Api-Key': NESHAN_API_KEY
+                },
+                params: {
+                    lat: data.location.latitude,
+                    lng: data.location.longitude
+                }
+            })
+
+            let reverse = await requestReverse.get().catch(err => {
+                console.log("NESHAN REVERSE ORIGIN ERROR", err.data);
+                return err.data
+            });
+
+            let result = {
+                reverse: reverse.data
             }
 
 
