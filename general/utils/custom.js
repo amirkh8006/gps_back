@@ -528,8 +528,6 @@ module.exports = {
 
         if (data.method === "direction&Reverse") {
 
-
-
             const requestDirection = axios.create({
                 method: 'get',
                 baseURL: theDirectionUrl,
@@ -545,8 +543,8 @@ module.exports = {
             })
 
             let direction = await requestDirection.get().catch(err => {
-                console.log("NESHAN DIRECTION ERROR", err.data);
-                return err.data
+                console.log("NESHAN DIRECTION ERROR", err);
+                return err
             });
 
             const requestReverseOrigin = axios.create({
@@ -564,7 +562,7 @@ module.exports = {
 
             let reverseOrigin = await requestReverseOrigin.get().catch(err => {
                 console.log("NESHAN REVERSE ORIGIN ERROR", err);
-                return err.data
+                return err
             });
 
 
@@ -582,8 +580,8 @@ module.exports = {
             })
 
             let reverseDestination = await requestReverseDestination.get().catch(err => {
-                console.log("NESHAN REVERSE ORIGIN ERROR", err.data);
-                return err.data
+                console.log("NESHAN REVERSE ORIGIN ERROR", err);
+                return err
             });
 
 
@@ -611,14 +609,39 @@ module.exports = {
             })
 
             let reverse = await requestReverse.get().catch(err => {
-                console.log("NESHAN REVERSE ORIGIN ERROR", err.data);
-                return err.data
+                console.log("NESHAN REVERSE ORIGIN ERROR", err);
+                return err
             });
 
             let result = {
                 reverse: reverse.data
             }
 
+
+            return result
+        }else if (data.method === "direction") {
+            const requestDirection = axios.create({
+                method: 'get',
+                baseURL: theDirectionUrl,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Api-Key': NESHAN_API_KEY
+                },
+                params: {
+                    type: 'car',
+                    origin: `${data.origin.latitude},${data.origin.longitude}`,
+                    destination: `${data.destination.latitude},${data.destination.longitude}`
+                }
+            })
+
+            let direction = await requestDirection.get().catch(err => {
+                console.log("NESHAN DIRECTION ERROR", err);
+                return err
+            });
+
+            let result = {
+                direction: direction.data
+            }
 
             return result
         }
