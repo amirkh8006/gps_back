@@ -9,6 +9,7 @@ var base64 = require('base-64');
 
 const {
     Create,
+    Create_V1,
     SingleFind,
     MultipleFindArray
 } = require('../utils/generator');
@@ -351,6 +352,12 @@ module.exports = {
         io_socket.on("create", data => {
             Create(data, null).then(result => {
                 io_socket.emit('create', result);
+            });
+        });
+
+        io_socket.on("create_v1", data => {
+            Create_V1(data, null).then(result => {
+                io_socket.emit('create_v1', result);
             });
         });
 
