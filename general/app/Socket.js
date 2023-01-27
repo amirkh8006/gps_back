@@ -11,7 +11,8 @@ const {
     Create,
     Create_V1,
     SingleFind,
-    MultipleFindArray
+    MultipleFindArray,
+    SingleFindLocationHistory
 } = require('../utils/generator');
 var util = require('util');
 
@@ -20,7 +21,8 @@ const {
     SendSms_With_Kavehnegar,
     test123,
     userRegister,
-    decode , encode , SendSms_With_Body_Kavehnegar
+    decode , encode , SendSms_With_Body_Kavehnegar,
+    postRequestNeshan
 } = require('../utils/custom');
 const {
     ObjectID
@@ -372,6 +374,30 @@ module.exports = {
 
 
         // ================= AUTH =======================
+
+
+        // ================= AUTH =======================
+
+        io_socket.on("find-location-history", _findData => {
+            SingleFindLocationHistory(_findData, null).then(result => {
+                // console.log('FIND' , result);
+                io_socket.emit('find-location-history', result);
+            });
+        });
+
+        // ================= AUTH =======================
+
+        // ================= GET DIRECTION =======================
+
+        io_socket.on("post-neshan", data => {
+            postRequestNeshan(data).then(result => {
+                // console.log('FIND' , result);
+                io_socket.emit('post-neshan', result);
+            });
+        });
+
+        // ================= GET DIRECTION =======================
+
 
         // io_socket.on("login", data => {
 
