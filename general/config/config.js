@@ -13,5 +13,6 @@ module.exports = {
         "start-login-TO-login": 20 * 1000
     },
     send_location_inteval_ms: 1000,
+    send_location_detail_inteval_ms: 5000,
     NESHAN_API_KEY: "service.ce9181bf37bf4cb68de342a376a8ab06"
 }

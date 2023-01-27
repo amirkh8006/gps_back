@@ -1735,7 +1735,8 @@ module.exports = {
             let _filter = {
             collectionName:"tst",
             startDate: "ISO DATE",
-            endDate: "ISO DATE"
+            endDate: "ISO DATE",
+            limit: LIMIT OF FIND
         }
         
         singleFind(_filter).then((x)=>{
@@ -1751,6 +1752,7 @@ module.exports = {
             let collectionTitle = await db.collection(collectionName);
             let startDate = filter['startDate'];
             let endDate = filter['endDate'];
+            let limit = filter['limit'];
             let uuid = filter['uuid'];
             var dt = await collectionTitle.find({
                 createdAt: {
@@ -1758,7 +1760,7 @@ module.exports = {
                     $lte: new Date(endDate)
                 },
                 uid: uuid
-            }).limit(1000).toArray();
+            }).limit(Number(limit)).toArray();
             // let obj = {};
             // obj[collectionName] = dt;
             /*

@@ -430,15 +430,36 @@ module.exports = {
 
         // });
 
+        var intervalGetLocationDetail;
+        // send location to client
+        io_socket.on("get-location-detail", async (data) => {
+
+            let result = await SingleFindLocationHistory(data, null);
+
+            io_socket.emit(`get-location-detail`,result);
+            
+
+            intervalGetLocationDetail = setInterval(async () => {
+
+                let result = await SingleFindLocationHistory(data, null);
+
+                io_socket.emit(`get-location-detail`, result);
+
+                //     // 1. Find Online User UID (From data) (Get LocalStorage) 
+                //     // 2. Find UID From Database Json Result Location
+            }, config.send_location_detail_inteval_ms);
+
+
+        });
 
 
 
-        var interval;
+        var intervalGetLocation;
         // send location to client
         io_socket.on("get-location", (data) => {
             
 
-            interval = setInterval(async () => {
+            intervalGetLocation = setInterval(async () => {
                 let collectionFilter = {
                     collectionName: "location",
                     fields: {
@@ -461,7 +482,8 @@ module.exports = {
 
         io_socket.on('disconnect', () => {
             // TCP_SERVER_DATA = [];
-            clearInterval(interval);
+            clearInterval(intervalGetLocation);
+            clearInterval(intervalGetLocationDetail);
         });
 
     }
