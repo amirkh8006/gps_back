@@ -322,7 +322,7 @@ module.exports = {
                     msg.RESULT_MSG["message"] = [{SUCCESS:'توکن ارسال شده معتبر نیست'}];
                     msg.RESULT_MSG["exeption"] = [];
             }
-            console.log(msg.RESULT_MSG);
+            // console.log(msg.RESULT_MSG);
             io_socket.emit('token-info' , msg.RESULT_MSG);
 
         });
@@ -367,8 +367,14 @@ module.exports = {
 
         io_socket.on("find", _findData => {
             SingleFind(_findData, null).then(result => {
-                // console.log('FIND' , result);
                 io_socket.emit('find', result);
+            });
+        });
+
+
+        io_socket.on("multiple-find", _findData => {
+            MultipleFindArray(_findData, null).then(result => {
+                io_socket.emit('multiple-find', result);
             });
         });
 
