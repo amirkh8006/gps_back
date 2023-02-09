@@ -123,12 +123,7 @@ module.exports = {
                 collectionData.location["id"] = null;
             }
 
-            let resultCreate = await Create(collectionData, null)
-            console.log("RESULT" , resultCreate);
-
-
-            tcp_socket.write("SEND");
-            tcp_socket.end();
+            await Create(collectionData, null)
 
             let createLogData = {
                 locationLog: {
@@ -160,12 +155,14 @@ module.exports = {
             }
 
 
-            let createdLogResult = await Create(createLogData, null)
-            console.log("DATA LOG CREATED", createdLogResult);
+            await Create(createLogData, null)
 
             } else {
                 console.log('JSON NOT OK');
             }
+
+            tcp_socket.write("SEND");
+            tcp_socket.end();
 
             // let json = JSON.parse(str);
             // console.log('AAA' , json);
