@@ -11,6 +11,7 @@ const {
     Create,
     Create_V1,
     SingleFind,
+    SingleFind_V2,
     MultipleFindArray,
     SingleFindLocationHistory
 } = require('../utils/generator');
@@ -357,6 +358,14 @@ module.exports = {
             });
         });
 
+        io_socket.on("createAndResult", data => {
+            let eventName = data['eventName'];
+            delete data['eventName'];
+            Create(data, null).then(result => {
+                io_socket.emit(eventName, result);
+            });
+        });
+
         io_socket.on("create_v1", data => {
             Create_V1(data, null).then(result => {
                 io_socket.emit('create_v1', result);
@@ -371,12 +380,46 @@ module.exports = {
             });
         });
 
+        io_socket.on("find-everyEvent", _findData => {
+            let eventName = _findData['eventName'];
+            delete _findData['eventName']; 
+            SingleFind(_findData, null).then(result => {
+                io_socket.emit(eventName, result);
+            });
+        });
+
 
         io_socket.on("multiple-find", _findData => {
+            // console.log('MF' , _findData[0]['collectionName']);
+          
             MultipleFindArray(_findData, null).then(result => {
                 io_socket.emit('multiple-find', result);
             });
         });
+
+        
+        io_socket.on("multiple-find-everyEvent", _findData => {
+            let eventName =  _findData[0]['eventName'];
+            delete _findData[0]['eventName'];
+            MultipleFindArray(_findData, null).then(result => {
+                io_socket.emit(eventName, result);
+            });
+        });
+
+        // io_socket.on("new-find", param => {
+        //     console.log('find' , param);
+        //     io_socket.emit('new-find', ['SALAM EVENT']);
+        //     // if (_findData[0]['collectionName'] == 'EMIT_EVENT') {
+               
+        //     //     console.log(_findData[0]['fields']['emitEventName']);
+        //     //     let event = _findData[0]['fields']['emitEventName'];
+        //     //     console.log('YES',event);
+        //     //     io_socket.emit('userPermission', ['SALAM EVENT']);
+        //     // }
+           
+        // });
+
+    
 
 
         // ================= AUTH =======================
