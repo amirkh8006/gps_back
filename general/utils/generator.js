@@ -1,5 +1,5 @@
 const {
-    MongoClient
+    MongoClient, ObjectId
 } = require("mongodb");
 var ObjectID = require("mongodb").ObjectID
 const Validator = require("fastest-validator");
@@ -878,6 +878,11 @@ module.exports = {
             let collectionName = filter['collectionName'];
             let collectionTitle = await db.collection(collectionName);
             let fields = filter['fields'];
+            if (fields['_id']) {
+                let _id = ObjectId(filter['fields']['_id']);
+                filter['fields']['_id'] = _id;
+            }
+            // console.log('GHOLI' , fields);
             var dt = await collectionTitle.find(fields).toArray();
             // console.log('dt' , dt);
             // let obj = {};
@@ -926,7 +931,7 @@ module.exports = {
 
     },
 
-    async SingleFind_V2(filter) {
+    async SingleFind_Pagination(filter) {
 
         /*
             How To Run Function : 
@@ -947,12 +952,16 @@ module.exports = {
 
         if (typeof (filter) == "object") {
             let collectionName = filter['collectionName'];
+            let skipNumber = filter['skipNumber'];
+            let limitNumber = filter['limitNumber'];
             let collectionTitle = await db.collection(collectionName);
             let fields = filter['fields'];
-            var dt = await collectionTitle.find(fields).toArray();
-            // console.log('dt' , dt);
-            // let obj = {};
-            // obj[collectionName] = dt;
+            if (fields['_id']) {
+                let _id = ObjectId(filter['fields']['_id']);
+                filter['fields']['_id'] = _id;
+            }
+            var dt = await collectionTitle.find(fields).limit(limitNumber).skip(skipNumber).toArray();
+
             /*
                 { 
                     status: 200,
@@ -1879,133 +1888,241 @@ module.exports = {
 
 }
 
-async function Create_New(model, validateFields) {
+    async function Create_New(model, validateFields) {
 
-    // const session = client.startSession();
+        // const session = client.startSession();
 
-    msg.RESULT_MSG["status"] = 0,
-        msg.RESULT_MSG["data"] = [];
-    msg.RESULT_MSG["message"] = [];
-    msg.RESULT_MSG["exeption"] = [];
+        msg.RESULT_MSG["status"] = 0,
+            msg.RESULT_MSG["data"] = [];
+        msg.RESULT_MSG["message"] = [];
+        msg.RESULT_MSG["exeption"] = [];
 
-    /*
-    How To Run Function : 
+        /*
+        How To Run Function : 
 
-        let _model2 = {
-            tst:{
-                id:null,
-                duplicateFields:['Name'],
-                Name:"qq" ,
-                family:"AHMADI" ,
-                lat:"96.0000000",
-                Address:[ {Title:"@@@@@44" , Street:"$$$$$4"} , {Title:"@@@@fff@deddd" , Street:"$$rrrr$$$r"}  ]
-            },
-            location:{id:null,Lat:"2ss00sqfff44ee" , Lgt:"4044fsffqrr"},
-            loc:{id:null,abc:"222ddd22"}
-}
+            let _model2 = {
+                tst:{
+                    id:null,
+                    duplicateFields:['Name'],
+                    Name:"qq" ,
+                    family:"AHMADI" ,
+                    lat:"96.0000000",
+                    Address:[ {Title:"@@@@@44" , Street:"$$$$$4"} , {Title:"@@@@fff@deddd" , Street:"$$rrrr$$$r"}  ]
+                },
+                location:{id:null,Lat:"2ss00sqfff44ee" , Lgt:"4044fsffqrr"},
+                loc:{id:null,abc:"222ddd22"}
+    }
 
 
-var schema = {
+    var schema = {
 
-    tst:{
-            Name: {
-                type: "string", // ----> By Default Required !
-                empty: false,
-                trim: true
-                // min: 3, max: 255
-            },
-            family:{
-                type: "string",
-                // optional: true ---> Not Required !
-            },
-            lat:{
-                type: "string",
-                // type: "equal", field: "password"
-                // trim: true, lowercase: true
-                // uppercase: true
-                // type: "email" 
-                // type: "number", positive: true, integer: true
-            },
-            Address:{
-                type: "array"
-            }
-    },
-
-    location:{
-        Lat:{
-            type: "string"
-            
+        tst:{
+                Name: {
+                    type: "string", // ----> By Default Required !
+                    empty: false,
+                    trim: true
+                    // min: 3, max: 255
+                },
+                family:{
+                    type: "string",
+                    // optional: true ---> Not Required !
+                },
+                lat:{
+                    type: "string",
+                    // type: "equal", field: "password"
+                    // trim: true, lowercase: true
+                    // uppercase: true
+                    // type: "email" 
+                    // type: "number", positive: true, integer: true
+                },
+                Address:{
+                    type: "array"
+                }
         },
-        Lgt:{
-            type: "string"
+
+        location:{
+            Lat:{
+                type: "string"
+                
+            },
+            Lgt:{
+                type: "string"
+            }
+        },
+
+        loc:{
+            abc:{
+                type: "string"
+            }
+        }    
+
+    };
+
+    // Create(_model2 , schema).then(x=>{
+    //     console.log('T' , x);
+    // });
+
+        */
+
+        let Msg = [];
+        if (model === null || model === undefined || typeof (model) === 'string' || typeof (model) === 'number' || typeof (model) === 'boolean' || Object.keys(model).length === 0) {
+            Msg.push({
+                Message: "The model empty OR Invalid Type!",
+                status: 'ErrorModel'
+            });
+            return Msg;
         }
-    },
 
-    loc:{
-        abc:{
-            type: "string"
+
+        let modelIsAllObject = true;
+        let modelNameInObject = "";
+
+        let keysModel = Object.keys(model);
+
+        for (let c = 0; c < keysModel.length; c++) {
+
+            let tableName = keysModel[c];
+            let tableFields = model[tableName];
+            if (tableFields === null || Object.keys(tableFields).length == 0 || typeof (tableFields) === 'string' || typeof (tableFields) === 'number' || typeof (tableFields) === 'boolean') {
+                modelIsAllObject = false;
+                modelNameInObject = tableName;
+            }
         }
-    }    
 
-};
+        for (let i = 0; i < keysModel.length; i++) {
+            // console.log('III' , i);
+            let tableName = keysModel[i];
+            let tableFields = model[tableName];
+            let findIdKey = 'id' in tableFields;
+            let findIdValue = tableFields['id'];
 
-// Create(_model2 , schema).then(x=>{
-//     console.log('T' , x);
-// });
-
-    */
-
-    let Msg = [];
-    if (model === null || model === undefined || typeof (model) === 'string' || typeof (model) === 'number' || typeof (model) === 'boolean' || Object.keys(model).length === 0) {
-        Msg.push({
-            Message: "The model empty OR Invalid Type!",
-            status: 'ErrorModel'
-        });
-        return Msg;
-    }
-
-
-    let modelIsAllObject = true;
-    let modelNameInObject = "";
-
-    let keysModel = Object.keys(model);
-
-    for (let c = 0; c < keysModel.length; c++) {
-
-        let tableName = keysModel[c];
-        let tableFields = model[tableName];
-        if (tableFields === null || Object.keys(tableFields).length == 0 || typeof (tableFields) === 'string' || typeof (tableFields) === 'number' || typeof (tableFields) === 'boolean') {
-            modelIsAllObject = false;
-            modelNameInObject = tableName;
-        }
-    }
-
-    for (let i = 0; i < keysModel.length; i++) {
-        // console.log('III' , i);
-        let tableName = keysModel[i];
-        let tableFields = model[tableName];
-        let findIdKey = 'id' in tableFields;
-        let findIdValue = tableFields['id'];
-
-        const p2e = s => s.replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
-        let getTime = new Date().getHours() + ':' + new Date().getMinutes() + ':' + new Date().getSeconds() + ':' + new Date().getMilliseconds();
-        tableFields['createdAt'] = new Date();
-        tableFields['updatedAt'] = new Date();
-        tableFields['shamsi_createAt'] = p2e(new Date().toLocaleDateString('fa-IR') + ' ' + getTime);
+            const p2e = s => s.replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
+            let getTime = new Date().getHours() + ':' + new Date().getMinutes() + ':' + new Date().getSeconds() + ':' + new Date().getMilliseconds();
+            tableFields['createdAt'] = new Date();
+            tableFields['updatedAt'] = new Date();
+            tableFields['shamsi_createAt'] = p2e(new Date().toLocaleDateString('fa-IR') + ' ' + getTime);
 
 
 
-        // console.log('TN' , tableName);
-        // console.log('TF' , tableFields);
+            // console.log('TN' , tableName);
+            // console.log('TF' , tableFields);
 
-        if (validateFields != null && validateFields != undefined && typeof (validateFields) != 'string' && typeof (validateFields) != 'number' && typeof (validateFields) != 'boolean' && Object.keys(validateFields).length > 0 && findIdKey === true && ObjectID.isValid(findIdValue) === true) {
-            // UpdateOne With Validation !
-            console.log('Update With Validation');
+            if (validateFields != null && validateFields != undefined && typeof (validateFields) != 'string' && typeof (validateFields) != 'number' && typeof (validateFields) != 'boolean' && Object.keys(validateFields).length > 0 && findIdKey === true && ObjectID.isValid(findIdValue) === true) {
+                // UpdateOne With Validation !
+                console.log('Update With Validation');
 
-            //delete tableFields['id'];
-            const resValidate = await checkValidator(validateFields[tableName], model[tableName]);
-            // console.log('RRR' , resValidate);
-            if (resValidate === true) {
+                //delete tableFields['id'];
+                const resValidate = await checkValidator(validateFields[tableName], model[tableName]);
+                // console.log('RRR' , resValidate);
+                if (resValidate === true) {
+
+                    if (modelIsAllObject === true) {
+
+                        let id = tableFields['id'];
+                        delete tableFields['id'];
+                        let collectionName = await db.collection(tableName);
+                        let updateModel = await collectionName.updateOne({
+                            _id: ObjectID(id)
+                        }, {
+                            '$set': tableFields
+                        }, {
+                            upsert: false
+                        });
+                        if (updateModel.acknowledged == true && updateModel.modifiedCount == 1) {
+
+                            msg.RESULT_MSG["status"] = 200;
+                            msg.RESULT_MSG["data"].push({
+                                Message: `The record in the ${tableName} collection was edited`
+                            });
+                            msg.RESULT_MSG["message"].push({
+                                SUCCESS: "اطلاعات با موفقیت ویرایش شد"
+                            });
+                            msg.RESULT_MSG["exeption"] = [];
+
+                            // msg.SUCCESS_UPDATE["data"] = {Message:`The record in the ${tableName} collection was edited`};
+                            // return msg.SUCCESS_UPDATE;
+
+                            // Msg.push({Message:`The record in the ${tableName} collection was edited`, status: 'Update'});
+                        } else if (updateModel.acknowledged == true && updateModel.matchedCount == 1) {
+
+                            msg.RESULT_MSG["status"] = 200;
+                            msg.RESULT_MSG["data"].push({
+                                Message: `There is no change to edit in ${tableName} Collection!`
+                            });
+                            msg.RESULT_MSG["message"].push({
+                                SUCCESS: "تغییراتی در اطلاعات ویرایشی صورت نگرفت"
+                            });
+                            msg.RESULT_MSG["exeption"] = [];
+
+                            // msg.UPDATE_CHANGE["data"] = {Message:`There is no change to edit in ${tableName} Collection!`};
+                            // return msg.UPDATE_CHANGE;
+
+                            // Msg.push({Message:`There is no change to edit in ${tableName} Collection!`, status: 'NotChange'});
+                        } else {
+                            msg.RESULT_MSG["status"] = 200;
+                            msg.RESULT_MSG["data"].push({
+                                Message: `Not Found Record in the ${tableName} collection For Edit!`
+                            });
+                            msg.RESULT_MSG["message"].push({
+                                SUCCESS: "اطلاعاتی جهت ویرایش یافت نشد"
+                            });
+                            msg.RESULT_MSG["exeption"] = [];
+
+                            // msg.UPDATE_NOTFOUND["data"] = {Message:`Not Found Record in the ${tableName} collection For Edit!`};
+                            // return msg.UPDATE_NOTFOUND;
+
+                            // Msg.push({Message:`Not Found Record in the ${tableName} collection For Edit!`, status: 'NotFound'});
+                        }
+
+                    } else {
+                        msg.RESULT_MSG["status"] = 500;
+                        msg.RESULT_MSG["data"].push({
+                            Message: `Object ${modelNameInObject} In Model Invalid !`
+                        });
+                        msg.RESULT_MSG["message"] = [];
+                        msg.RESULT_MSG["exeption"].push({
+                            ERROR: "مدل مورد نظر از نوع آبجکت نیست"
+                        });
+
+                        // msg.OBJECT_MODEL["data"] = {Message:`Object ${modelNameInObject} In Model Invalid !`};
+                        // return msg.OBJECT_MODEL;
+
+                        // Msg.push({Message:`Object ${modelNameInObject} In Model Invalid !`, status: 'InvalidObject'});
+                        // return Msg;
+                    }
+
+                } else {
+                    resValidate.forEach(element => {
+                        /*
+                            { 
+                            status: 100,
+                            data:{},
+                            message:"اعتبارسنجی فیلدها را بررسی نمایید",
+                            exeption:null
+                        }
+                        */
+                        msg.RESULT_MSG["status"] = 100;
+                        msg.RESULT_MSG["data"].push({
+                            Message: `in ${tableName} Collection ${element.message}`
+                        });
+                        msg.RESULT_MSG["message"] = [{
+                            FAIL: "اعتبارسنجی فیلدها را بررسی نمایید"
+                        }];
+                        msg.RESULT_MSG["exeption"] = [];
+
+                        // msg.INVALID_FIELD["data"] = {Message:`in ${tableName} Collection ${element.message}`};
+
+                        // Msg.push({Message:`in ${tableName} Collection ${element.message}`, status: 'InvalidField'});
+                    });
+                    // return msg.INVALID_FIELD;
+                }
+
+
+
+
+            } else if (findIdKey === true && ObjectID.isValid(findIdValue) === true) {
+                // UpdateOne Without Validation !
+                // console.log('Update Without Validation');
 
                 if (modelIsAllObject === true) {
 
@@ -2020,15 +2137,31 @@ var schema = {
                         upsert: false
                     });
                     if (updateModel.acknowledged == true && updateModel.modifiedCount == 1) {
+                        /*
+                            {
+                            status: 200,
+                            data:{},
+                            message:"اطلاعات با موفقیت ویرایش شد", 
+                            exeption:null
+                        }
+                            
+                            */
+
+                        let obj = {};
+                        obj[tableName] = model[tableName];
 
                         msg.RESULT_MSG["status"] = 200;
-                        msg.RESULT_MSG["data"].push({
-                            Message: `The record in the ${tableName} collection was edited`
-                        });
+                        // msg.RESULT_MSG["data"].push({Message:`Registration was done in the ${tableName} collection` , _id: insertToTable.insertedId});
+                        msg.RESULT_MSG["data"].push(obj);
                         msg.RESULT_MSG["message"].push({
                             SUCCESS: "اطلاعات با موفقیت ویرایش شد"
                         });
                         msg.RESULT_MSG["exeption"] = [];
+
+                        // msg.RESULT_MSG["status"] = 200;
+                        // msg.RESULT_MSG["data"].push({Message:`The record in the ${tableName} collection was edited`});
+                        // msg.RESULT_MSG["message"].push({SUCCESS:"اطلاعات با موفقیت ویرایش شد"});
+                        // msg.RESULT_MSG["exeption"] = [];
 
                         // msg.SUCCESS_UPDATE["data"] = {Message:`The record in the ${tableName} collection was edited`};
                         // return msg.SUCCESS_UPDATE;
@@ -2036,28 +2169,61 @@ var schema = {
                         // Msg.push({Message:`The record in the ${tableName} collection was edited`, status: 'Update'});
                     } else if (updateModel.acknowledged == true && updateModel.matchedCount == 1) {
 
+                        /*
+                            {
+                            status: 100,
+                            data:{},
+                            message:"تغییراتی در اطلاعات ویرایشی صورت نگرفت", 
+                            exeption:null
+                        }
+                        */
+                        let obj = {};
+                        obj[tableName] = model[tableName];
+
                         msg.RESULT_MSG["status"] = 200;
-                        msg.RESULT_MSG["data"].push({
-                            Message: `There is no change to edit in ${tableName} Collection!`
-                        });
+                        // msg.RESULT_MSG["data"].push({Message:`Registration was done in the ${tableName} collection` , _id: insertToTable.insertedId});
+                        msg.RESULT_MSG["data"].push(obj);
                         msg.RESULT_MSG["message"].push({
                             SUCCESS: "تغییراتی در اطلاعات ویرایشی صورت نگرفت"
                         });
                         msg.RESULT_MSG["exeption"] = [];
+
+                        // msg.RESULT_MSG["status"] = 200;
+                        // msg.RESULT_MSG["data"].push({Message:`There is no change to edit in ${tableName} Collection!`});
+                        // msg.RESULT_MSG["message"].push({SUCCESS:"تغییراتی در اطلاعات ویرایشی صورت نگرفت"});
+                        // msg.RESULT_MSG["exeption"] = [];
+
 
                         // msg.UPDATE_CHANGE["data"] = {Message:`There is no change to edit in ${tableName} Collection!`};
                         // return msg.UPDATE_CHANGE;
 
                         // Msg.push({Message:`There is no change to edit in ${tableName} Collection!`, status: 'NotChange'});
                     } else {
+                        /*
+                            {
+                                status: 100,
+                                data:{},
+                                message:"اطلاعاتی جهت ویرایش یافت نشد", 
+                                exeption:null
+                            }
+                        
+                        */
+                        let obj = {};
+                        obj[tableName] = model[tableName];
+
                         msg.RESULT_MSG["status"] = 200;
-                        msg.RESULT_MSG["data"].push({
-                            Message: `Not Found Record in the ${tableName} collection For Edit!`
-                        });
+                        // msg.RESULT_MSG["data"].push({Message:`Registration was done in the ${tableName} collection` , _id: insertToTable.insertedId});
+                        msg.RESULT_MSG["data"].push(obj);
                         msg.RESULT_MSG["message"].push({
                             SUCCESS: "اطلاعاتی جهت ویرایش یافت نشد"
                         });
                         msg.RESULT_MSG["exeption"] = [];
+
+
+                        // msg.RESULT_MSG["status"] = 200;
+                        // msg.RESULT_MSG["data"].push({Message:`Not Found Record in the ${tableName} collection For Edit!`});
+                        // msg.RESULT_MSG["message"].push({SUCCESS:"اطلاعاتی جهت ویرایش یافت نشد"});
+                        // msg.RESULT_MSG["exeption"] = [];
 
                         // msg.UPDATE_NOTFOUND["data"] = {Message:`Not Found Record in the ${tableName} collection For Edit!`};
                         // return msg.UPDATE_NOTFOUND;
@@ -2066,6 +2232,15 @@ var schema = {
                     }
 
                 } else {
+                    /*
+                    {
+                        status: 500,
+                        data:{},
+                        message:null,
+                        exeption:"مدل مورد نظر از نوع آبجکت نیست"
+                    }
+                    */
+
                     msg.RESULT_MSG["status"] = 500;
                     msg.RESULT_MSG["data"].push({
                         Message: `Object ${modelNameInObject} In Model Invalid !`
@@ -2082,206 +2257,219 @@ var schema = {
                     // return Msg;
                 }
 
-            } else {
-                resValidate.forEach(element => {
-                    /*
-                        { 
-                        status: 100,
-                        data:{},
-                        message:"اعتبارسنجی فیلدها را بررسی نمایید",
-                        exeption:null
-                    }
-                    */
-                    msg.RESULT_MSG["status"] = 100;
-                    msg.RESULT_MSG["data"].push({
-                        Message: `in ${tableName} Collection ${element.message}`
-                    });
-                    msg.RESULT_MSG["message"] = [{
-                        FAIL: "اعتبارسنجی فیلدها را بررسی نمایید"
-                    }];
-                    msg.RESULT_MSG["exeption"] = [];
+            } else if (validateFields != null && validateFields != undefined && typeof (validateFields) != 'string' && typeof (validateFields) != 'number' && typeof (validateFields) != 'boolean' && Object.keys(validateFields).length > 0 && findIdValue === null && findIdKey === true) {
+                // InsertOne With Validation !
+                console.log('INSERT With Validation');
 
-                    // msg.INVALID_FIELD["data"] = {Message:`in ${tableName} Collection ${element.message}`};
-
-                    // Msg.push({Message:`in ${tableName} Collection ${element.message}`, status: 'InvalidField'});
-                });
-                // return msg.INVALID_FIELD;
-            }
-
-
-
-
-        } else if (findIdKey === true && ObjectID.isValid(findIdValue) === true) {
-            // UpdateOne Without Validation !
-            // console.log('Update Without Validation');
-
-            if (modelIsAllObject === true) {
-
-                let id = tableFields['id'];
                 delete tableFields['id'];
-                let collectionName = await db.collection(tableName);
-                let updateModel = await collectionName.updateOne({
-                    _id: ObjectID(id)
-                }, {
-                    '$set': tableFields
-                }, {
-                    upsert: false
-                });
-                if (updateModel.acknowledged == true && updateModel.modifiedCount == 1) {
-                    /*
-                        {
-                        status: 200,
-                        data:{},
-                        message:"اطلاعات با موفقیت ویرایش شد", 
-                        exeption:null
+                const resValidate = await checkValidator(validateFields[tableName], model[tableName]);
+
+                if (resValidate === true) {
+
+                    if (modelIsAllObject === true) {
+                        delete tableFields['id'];
+                        let duplicateFields = tableFields['duplicateFields'];
+
+                        let collectionName = await db.collection(tableName);
+
+                        if (duplicateFields) {
+                            let duplicateFilter = {};
+                            for (let f = 0; f < duplicateFields.length; f++) {
+                                duplicateFilter[duplicateFields[f]] = tableFields[duplicateFields[f]];
+                            }
+                            if (duplicateFilter) {
+                                let _findObject = await collectionName.find(duplicateFilter).toArray();
+
+
+                                if (Object.keys(_findObject).length == 0) {
+                                    // console.log('INSERT_DUP');
+                                    delete tableFields['duplicateFields'];
+                                    const insertToTable = await collectionName.insertOne(tableFields); //
+                                    if ((insertToTable.acknowledged == true) && (insertToTable.insertedId != null || insertToTable.insertedId != undefined)) {
+
+                                        msg.RESULT_MSG["status"] = 200;
+                                        msg.RESULT_MSG["data"].push({
+                                            Message: `Registration was done in the ${tableName} collection`
+                                        });
+                                        msg.RESULT_MSG["message"].push({
+                                            SUCCESS: "اطلاعات با موفقیت ثبت شد"
+                                        });
+                                        msg.RESULT_MSG["exeption"] = [];
+
+                                        // msg.SUCCESS_INSERT["data"] = {Message:`Registration was done in the ${tableName} collection`};
+                                        // return msg.SUCCESS_INSERT;
+                                        // Msg.push({Message:`Registration was done in the ${tableName} collection`, status: 'Insert'});
+                                    } else {
+                                        msg.RESULT_MSG["status"] = 100,
+                                            msg.RESULT_MSG["data"].push({
+                                                Message: "An error has occurred"
+                                            });
+                                        msg.RESULT_MSG["message"].push({
+                                            FAIL: "خطایی رخ داده است لطفا مجددا تلاش نمایید"
+                                        });
+                                        msg.RESULT_MSG["exeption"] = [];
+
+                                        // msg.ERROR["data"] = {Message:"An error has occurred"};
+                                        // return msg.ERROR;
+                                    }
+                                } else {
+
+                                    msg.RESULT_MSG["status"] = 100,
+                                        msg.RESULT_MSG["data"].push({
+                                            Message: `Duplicate Record (${duplicateFields}) in ${tableName} collection `
+                                        });
+                                    msg.RESULT_MSG["message"].push({
+                                        FAIL: "این اطلاعات قبلا ثبت شده است"
+                                    });
+                                    msg.RESULT_MSG["exeption"] = [];
+
+                                    // msg.DUPLICATE_RECORD["data"] = {Message:`Duplicate Record (${duplicateFields}) in ${tableName} collection `}
+                                    // return msg.DUPLICATE_RECORD;
+
+                                    // Msg.push({Message:`Duplicate Record (${duplicateFields}) in ${tableName} collection `, status: 'Duplicate'});
+                                }
+                            }
+
+                        } else {
+
+                            const insertToTable = await collectionName.insertOne(tableFields); //
+                            if ((insertToTable.acknowledged == true) && (insertToTable.insertedId != null || insertToTable.insertedId != undefined)) {
+
+                                msg.RESULT_MSG["status"] = 200;
+                                msg.RESULT_MSG["data"].push({
+                                    Message: `Registration was done in the ${tableName} collection`
+                                });
+                                msg.RESULT_MSG["message"].push({
+                                    SUCCESS: "اطلاعات با موفقیت ثبت شد"
+                                });
+                                msg.RESULT_MSG["exeption"] = [];
+
+                                // msg.SUCCESS_INSERT["data"] = {Message:`Registration was done in the ${tableName} collection`};
+                                // return msg.SUCCESS_INSERT;
+                                // Msg.push({Message:`Registration was done in the ${tableName} collection`, status: 'Insert'});
+                            } else {
+
+                                msg.RESULT_MSG["status"] = 100,
+                                    msg.RESULT_MSG["data"].push({
+                                        Message: "An error has occurred"
+                                    });
+                                msg.RESULT_MSG["message"].push({
+                                    FAIL: "خطایی رخ داده است لطفا مجددا تلاش نمایید"
+                                });
+                                msg.RESULT_MSG["exeption"] = [];
+
+                                // msg.ERROR["data"] = {Message:"An error has occurred"};
+                                // return msg.ERROR;
+
+                                // Msg.push({Message:"An error has occurred", status: 'Occurred'});
+                            }
+                        }
+
+
+
+
+                    } else {
+                        /*
+                            {
+                                status: 500,
+                                data:{},
+                                message:null,
+                                exeption:"مدل مورد نظر از نوع آبجکت نیست"
+                            },
+                        */
+                        msg.RESULT_MSG["status"] = 500,
+                            msg.RESULT_MSG["data"].push({
+                                Message: `Object ${modelNameInObject} In Model Invalid !`
+                            });
+                        msg.RESULT_MSG["message"] = [];
+                        msg.RESULT_MSG["exeption"].push({
+                            ERROR: "مدل مورد نظر از نوع آبجکت نیست"
+                        });
+
+                        // msg.OBJECT_MODEL["data"] = {Message:`Object ${modelNameInObject} In Model Invalid !`};
+                        // return msg.OBJECT_MODEL;
+
+                        // Msg.push({Message:`Object ${modelNameInObject} In Model Invalid !`, status: 'InvalidObject'});
+                        // return Msg;
                     }
+
+                } else {
+                    resValidate.forEach(element => {
+                        /*
+                            { 
+                                status: 100,
+                                data:{},
+                                message:"اعتبارسنجی فیلدها را بررسی نمایید",
+                                exeption:null
+                            },
+                        
                         
                         */
 
-                    let obj = {};
-                    obj[tableName] = model[tableName];
+                        msg.RESULT_MSG["status"] = 100,
+                            msg.RESULT_MSG["data"].push({
+                                Message: `in ${tableName} Collection ${element.message}`
+                            });
+                        msg.RESULT_MSG["message"].push({
+                            FAIL: "اعتبارسنجی فیلدها را بررسی نمایید"
+                        });
+                        msg.RESULT_MSG["exeption"] = [];
 
-                    msg.RESULT_MSG["status"] = 200;
-                    // msg.RESULT_MSG["data"].push({Message:`Registration was done in the ${tableName} collection` , _id: insertToTable.insertedId});
-                    msg.RESULT_MSG["data"].push(obj);
-                    msg.RESULT_MSG["message"].push({
-                        SUCCESS: "اطلاعات با موفقیت ویرایش شد"
+                        // msg.INVALID_FIELD["data"] = {Message:`in ${tableName} Collection ${element.message}`};
+
+                        // Msg.push({Message:`in ${tableName} Collection ${element.message}`, status: 'InvalidField'});
                     });
-                    msg.RESULT_MSG["exeption"] = [];
-
-                    // msg.RESULT_MSG["status"] = 200;
-                    // msg.RESULT_MSG["data"].push({Message:`The record in the ${tableName} collection was edited`});
-                    // msg.RESULT_MSG["message"].push({SUCCESS:"اطلاعات با موفقیت ویرایش شد"});
-                    // msg.RESULT_MSG["exeption"] = [];
-
-                    // msg.SUCCESS_UPDATE["data"] = {Message:`The record in the ${tableName} collection was edited`};
-                    // return msg.SUCCESS_UPDATE;
-
-                    // Msg.push({Message:`The record in the ${tableName} collection was edited`, status: 'Update'});
-                } else if (updateModel.acknowledged == true && updateModel.matchedCount == 1) {
-
-                    /*
-                        {
-                        status: 100,
-                        data:{},
-                        message:"تغییراتی در اطلاعات ویرایشی صورت نگرفت", 
-                        exeption:null
-                    }
-                    */
-                    let obj = {};
-                    obj[tableName] = model[tableName];
-
-                    msg.RESULT_MSG["status"] = 200;
-                    // msg.RESULT_MSG["data"].push({Message:`Registration was done in the ${tableName} collection` , _id: insertToTable.insertedId});
-                    msg.RESULT_MSG["data"].push(obj);
-                    msg.RESULT_MSG["message"].push({
-                        SUCCESS: "تغییراتی در اطلاعات ویرایشی صورت نگرفت"
-                    });
-                    msg.RESULT_MSG["exeption"] = [];
-
-                    // msg.RESULT_MSG["status"] = 200;
-                    // msg.RESULT_MSG["data"].push({Message:`There is no change to edit in ${tableName} Collection!`});
-                    // msg.RESULT_MSG["message"].push({SUCCESS:"تغییراتی در اطلاعات ویرایشی صورت نگرفت"});
-                    // msg.RESULT_MSG["exeption"] = [];
-
-
-                    // msg.UPDATE_CHANGE["data"] = {Message:`There is no change to edit in ${tableName} Collection!`};
-                    // return msg.UPDATE_CHANGE;
-
-                    // Msg.push({Message:`There is no change to edit in ${tableName} Collection!`, status: 'NotChange'});
-                } else {
-                    /*
-                        {
-                            status: 100,
-                            data:{},
-                            message:"اطلاعاتی جهت ویرایش یافت نشد", 
-                            exeption:null
-                        }
-                    
-                    */
-                    let obj = {};
-                    obj[tableName] = model[tableName];
-
-                    msg.RESULT_MSG["status"] = 200;
-                    // msg.RESULT_MSG["data"].push({Message:`Registration was done in the ${tableName} collection` , _id: insertToTable.insertedId});
-                    msg.RESULT_MSG["data"].push(obj);
-                    msg.RESULT_MSG["message"].push({
-                        SUCCESS: "اطلاعاتی جهت ویرایش یافت نشد"
-                    });
-                    msg.RESULT_MSG["exeption"] = [];
-
-
-                    // msg.RESULT_MSG["status"] = 200;
-                    // msg.RESULT_MSG["data"].push({Message:`Not Found Record in the ${tableName} collection For Edit!`});
-                    // msg.RESULT_MSG["message"].push({SUCCESS:"اطلاعاتی جهت ویرایش یافت نشد"});
-                    // msg.RESULT_MSG["exeption"] = [];
-
-                    // msg.UPDATE_NOTFOUND["data"] = {Message:`Not Found Record in the ${tableName} collection For Edit!`};
-                    // return msg.UPDATE_NOTFOUND;
-
-                    // Msg.push({Message:`Not Found Record in the ${tableName} collection For Edit!`, status: 'NotFound'});
+                    // return msg.INVALID_FIELD;
                 }
 
-            } else {
-                /*
-                 {
-                     status: 500,
-                     data:{},
-                     message:null,
-                     exeption:"مدل مورد نظر از نوع آبجکت نیست"
-                }
-                 */
+            } else if (validateFields === null && findIdKey === true && findIdValue === null) {
+                // InsertOne Without Validation !
+                console.log('INSERT Without Validation');
 
-                msg.RESULT_MSG["status"] = 500;
-                msg.RESULT_MSG["data"].push({
-                    Message: `Object ${modelNameInObject} In Model Invalid !`
-                });
-                msg.RESULT_MSG["message"] = [];
-                msg.RESULT_MSG["exeption"].push({
-                    ERROR: "مدل مورد نظر از نوع آبجکت نیست"
-                });
 
-                // msg.OBJECT_MODEL["data"] = {Message:`Object ${modelNameInObject} In Model Invalid !`};
-                // return msg.OBJECT_MODEL;
-
-                // Msg.push({Message:`Object ${modelNameInObject} In Model Invalid !`, status: 'InvalidObject'});
-                // return Msg;
-            }
-
-        } else if (validateFields != null && validateFields != undefined && typeof (validateFields) != 'string' && typeof (validateFields) != 'number' && typeof (validateFields) != 'boolean' && Object.keys(validateFields).length > 0 && findIdValue === null && findIdKey === true) {
-            // InsertOne With Validation !
-            console.log('INSERT With Validation');
-
-            delete tableFields['id'];
-            const resValidate = await checkValidator(validateFields[tableName], model[tableName]);
-
-            if (resValidate === true) {
 
                 if (modelIsAllObject === true) {
                     delete tableFields['id'];
                     let duplicateFields = tableFields['duplicateFields'];
-
                     let collectionName = await db.collection(tableName);
-
+                    // console.log('TTTFFF' , tableFields);
                     if (duplicateFields) {
+
                         let duplicateFilter = {};
                         for (let f = 0; f < duplicateFields.length; f++) {
                             duplicateFilter[duplicateFields[f]] = tableFields[duplicateFields[f]];
                         }
                         if (duplicateFilter) {
                             let _findObject = await collectionName.find(duplicateFilter).toArray();
-
-
                             if (Object.keys(_findObject).length == 0) {
-                                // console.log('INSERT_DUP');
                                 delete tableFields['duplicateFields'];
                                 const insertToTable = await collectionName.insertOne(tableFields); //
                                 if ((insertToTable.acknowledged == true) && (insertToTable.insertedId != null || insertToTable.insertedId != undefined)) {
 
+                                    /*
+                                    
+                                    SUCCESS_INSERT = {
+                                    status: 200,
+                                    data:{},
+                                    message:"اطلاعات با موفقیت ثبت شد", 
+                                    exeption:null
+                                },
+                                    
+                                    */
+
+                                    let obj = {};
+                                    obj[tableName] = model[tableName];
+                                    obj[tableName]['id'] = insertToTable.insertedId;
+                                    delete obj[tableName]['_id'];
+                                    // console.log(obj);
+                                    // console.log('TN' , {tableName:model[tableName]});
+                                    // console.log('M' , model[tableName]);
+                                    // let aa = tableName[tableFields];
+                                    //console.log('AAA' , aa);
+
                                     msg.RESULT_MSG["status"] = 200;
-                                    msg.RESULT_MSG["data"].push({
-                                        Message: `Registration was done in the ${tableName} collection`
-                                    });
+                                    // msg.RESULT_MSG["data"].push({Message:`Registration was done in the ${tableName} collection` , _id: insertToTable.insertedId});
+                                    msg.RESULT_MSG["data"].push(obj);
                                     msg.RESULT_MSG["message"].push({
                                         SUCCESS: "اطلاعات با موفقیت ثبت شد"
                                     });
@@ -2291,6 +2479,15 @@ var schema = {
                                     // return msg.SUCCESS_INSERT;
                                     // Msg.push({Message:`Registration was done in the ${tableName} collection`, status: 'Insert'});
                                 } else {
+                                    /*
+                                    ERROR = {
+                                        status: 100,
+                                        data:{},
+                                        message:"خطایی رخ داده است لطفا مجددا تلاش نمایید",
+                                        exeption:null
+                                    },
+                                    */
+                                    //console.log('MODEL' , model[i]);
                                     msg.RESULT_MSG["status"] = 100,
                                         msg.RESULT_MSG["data"].push({
                                             Message: "An error has occurred"
@@ -2302,9 +2499,13 @@ var schema = {
 
                                     // msg.ERROR["data"] = {Message:"An error has occurred"};
                                     // return msg.ERROR;
+
+                                    // Msg.push({Message:"An error has occurred", status: 'Occurred'});
                                 }
+
                             } else {
 
+                                // console.log('MODEL' , model[i]);
                                 msg.RESULT_MSG["status"] = 100,
                                     msg.RESULT_MSG["data"].push({
                                         Message: `Duplicate Record (${duplicateFields}) in ${tableName} collection `
@@ -2316,27 +2517,40 @@ var schema = {
 
                                 // msg.DUPLICATE_RECORD["data"] = {Message:`Duplicate Record (${duplicateFields}) in ${tableName} collection `}
                                 // return msg.DUPLICATE_RECORD;
-
                                 // Msg.push({Message:`Duplicate Record (${duplicateFields}) in ${tableName} collection `, status: 'Duplicate'});
                             }
                         }
 
+
                     } else {
 
+                        // console.log('NOT');
                         const insertToTable = await collectionName.insertOne(tableFields); //
                         if ((insertToTable.acknowledged == true) && (insertToTable.insertedId != null || insertToTable.insertedId != undefined)) {
 
+
+                            let obj = {};
+                            obj[tableName] = model[tableName];
+                            obj[tableName]['id'] = insertToTable.insertedId;
+                            delete obj[tableName]['_id'];
+                            // console.log(obj);
+                            // console.log('TN' , {tableName:model[tableName]});
+                            // console.log('M' , model[tableName]);
+                            // let aa = tableName[tableFields];
+                            //console.log('AAA' , aa);
+
                             msg.RESULT_MSG["status"] = 200;
-                            msg.RESULT_MSG["data"].push({
-                                Message: `Registration was done in the ${tableName} collection`
-                            });
+                            // msg.RESULT_MSG["data"].push({Message:`Registration was done in the ${tableName} collection` , _id: insertToTable.insertedId});
+                            msg.RESULT_MSG["data"].push(obj);
                             msg.RESULT_MSG["message"].push({
                                 SUCCESS: "اطلاعات با موفقیت ثبت شد"
                             });
                             msg.RESULT_MSG["exeption"] = [];
 
+                            // console.log('OBJ' , obj);
                             // msg.SUCCESS_INSERT["data"] = {Message:`Registration was done in the ${tableName} collection`};
                             // return msg.SUCCESS_INSERT;
+
                             // Msg.push({Message:`Registration was done in the ${tableName} collection`, status: 'Insert'});
                         } else {
 
@@ -2357,17 +2571,19 @@ var schema = {
                     }
 
 
-
-
                 } else {
+
                     /*
-                        {
-                            status: 500,
-                            data:{},
-                            message:null,
-                            exeption:"مدل مورد نظر از نوع آبجکت نیست"
-                        },
+                    {
+                        status: 500,
+                        data:{},
+                        message:null,
+                        exeption:"مدل مورد نظر از نوع آبجکت نیست"
+                    },
+                    
+                    
                     */
+
                     msg.RESULT_MSG["status"] = 500,
                         msg.RESULT_MSG["data"].push({
                             Message: `Object ${modelNameInObject} In Model Invalid !`
@@ -2383,318 +2599,111 @@ var schema = {
                     // Msg.push({Message:`Object ${modelNameInObject} In Model Invalid !`, status: 'InvalidObject'});
                     // return Msg;
                 }
-
-            } else {
-                resValidate.forEach(element => {
-                    /*
-                        { 
-                            status: 100,
-                            data:{},
-                            message:"اعتبارسنجی فیلدها را بررسی نمایید",
-                            exeption:null
-                        },
-                    
-                    
-                    */
-
-                    msg.RESULT_MSG["status"] = 100,
-                        msg.RESULT_MSG["data"].push({
-                            Message: `in ${tableName} Collection ${element.message}`
-                        });
-                    msg.RESULT_MSG["message"].push({
-                        FAIL: "اعتبارسنجی فیلدها را بررسی نمایید"
-                    });
-                    msg.RESULT_MSG["exeption"] = [];
-
-                    // msg.INVALID_FIELD["data"] = {Message:`in ${tableName} Collection ${element.message}`};
-
-                    // Msg.push({Message:`in ${tableName} Collection ${element.message}`, status: 'InvalidField'});
-                });
-                // return msg.INVALID_FIELD;
-            }
-
-        } else if (validateFields === null && findIdKey === true && findIdValue === null) {
-            // InsertOne Without Validation !
-            console.log('INSERT Without Validation');
-
-
-
-            if (modelIsAllObject === true) {
-                delete tableFields['id'];
-                let duplicateFields = tableFields['duplicateFields'];
-                let collectionName = await db.collection(tableName);
-                // console.log('TTTFFF' , tableFields);
-                if (duplicateFields) {
-
-                    let duplicateFilter = {};
-                    for (let f = 0; f < duplicateFields.length; f++) {
-                        duplicateFilter[duplicateFields[f]] = tableFields[duplicateFields[f]];
-                    }
-                    if (duplicateFilter) {
-                        let _findObject = await collectionName.find(duplicateFilter).toArray();
-                        if (Object.keys(_findObject).length == 0) {
-                            delete tableFields['duplicateFields'];
-                            const insertToTable = await collectionName.insertOne(tableFields); //
-                            if ((insertToTable.acknowledged == true) && (insertToTable.insertedId != null || insertToTable.insertedId != undefined)) {
-
-                                /*
-                                
-                                SUCCESS_INSERT = {
-                                status: 200,
-                                data:{},
-                                message:"اطلاعات با موفقیت ثبت شد", 
-                                exeption:null
-                            },
-                                
-                                */
-
-                                let obj = {};
-                                obj[tableName] = model[tableName];
-                                obj[tableName]['id'] = insertToTable.insertedId;
-                                delete obj[tableName]['_id'];
-                                // console.log(obj);
-                                // console.log('TN' , {tableName:model[tableName]});
-                                // console.log('M' , model[tableName]);
-                                // let aa = tableName[tableFields];
-                                //console.log('AAA' , aa);
-
-                                msg.RESULT_MSG["status"] = 200;
-                                // msg.RESULT_MSG["data"].push({Message:`Registration was done in the ${tableName} collection` , _id: insertToTable.insertedId});
-                                msg.RESULT_MSG["data"].push(obj);
-                                msg.RESULT_MSG["message"].push({
-                                    SUCCESS: "اطلاعات با موفقیت ثبت شد"
-                                });
-                                msg.RESULT_MSG["exeption"] = [];
-
-                                // msg.SUCCESS_INSERT["data"] = {Message:`Registration was done in the ${tableName} collection`};
-                                // return msg.SUCCESS_INSERT;
-                                // Msg.push({Message:`Registration was done in the ${tableName} collection`, status: 'Insert'});
-                            } else {
-                                /*
-                                ERROR = {
-                                    status: 100,
-                                    data:{},
-                                    message:"خطایی رخ داده است لطفا مجددا تلاش نمایید",
-                                    exeption:null
-                                },
-                                */
-                                //console.log('MODEL' , model[i]);
-                                msg.RESULT_MSG["status"] = 100,
-                                    msg.RESULT_MSG["data"].push({
-                                        Message: "An error has occurred"
-                                    });
-                                msg.RESULT_MSG["message"].push({
-                                    FAIL: "خطایی رخ داده است لطفا مجددا تلاش نمایید"
-                                });
-                                msg.RESULT_MSG["exeption"] = [];
-
-                                // msg.ERROR["data"] = {Message:"An error has occurred"};
-                                // return msg.ERROR;
-
-                                // Msg.push({Message:"An error has occurred", status: 'Occurred'});
-                            }
-
-                        } else {
-
-                            // console.log('MODEL' , model[i]);
-                            msg.RESULT_MSG["status"] = 100,
-                                msg.RESULT_MSG["data"].push({
-                                    Message: `Duplicate Record (${duplicateFields}) in ${tableName} collection `
-                                });
-                            msg.RESULT_MSG["message"].push({
-                                FAIL: "این اطلاعات قبلا ثبت شده است"
-                            });
-                            msg.RESULT_MSG["exeption"] = [];
-
-                            // msg.DUPLICATE_RECORD["data"] = {Message:`Duplicate Record (${duplicateFields}) in ${tableName} collection `}
-                            // return msg.DUPLICATE_RECORD;
-                            // Msg.push({Message:`Duplicate Record (${duplicateFields}) in ${tableName} collection `, status: 'Duplicate'});
-                        }
-                    }
-
-
-                } else {
-
-                    // console.log('NOT');
-                    const insertToTable = await collectionName.insertOne(tableFields); //
-                    if ((insertToTable.acknowledged == true) && (insertToTable.insertedId != null || insertToTable.insertedId != undefined)) {
-
-
-                        let obj = {};
-                        obj[tableName] = model[tableName];
-                        obj[tableName]['id'] = insertToTable.insertedId;
-                        delete obj[tableName]['_id'];
-                        // console.log(obj);
-                        // console.log('TN' , {tableName:model[tableName]});
-                        // console.log('M' , model[tableName]);
-                        // let aa = tableName[tableFields];
-                        //console.log('AAA' , aa);
-
-                        msg.RESULT_MSG["status"] = 200;
-                        // msg.RESULT_MSG["data"].push({Message:`Registration was done in the ${tableName} collection` , _id: insertToTable.insertedId});
-                        msg.RESULT_MSG["data"].push(obj);
-                        msg.RESULT_MSG["message"].push({
-                            SUCCESS: "اطلاعات با موفقیت ثبت شد"
-                        });
-                        msg.RESULT_MSG["exeption"] = [];
-
-                        // console.log('OBJ' , obj);
-                        // msg.SUCCESS_INSERT["data"] = {Message:`Registration was done in the ${tableName} collection`};
-                        // return msg.SUCCESS_INSERT;
-
-                        // Msg.push({Message:`Registration was done in the ${tableName} collection`, status: 'Insert'});
-                    } else {
-
-                        msg.RESULT_MSG["status"] = 100,
-                            msg.RESULT_MSG["data"].push({
-                                Message: "An error has occurred"
-                            });
-                        msg.RESULT_MSG["message"].push({
-                            FAIL: "خطایی رخ داده است لطفا مجددا تلاش نمایید"
-                        });
-                        msg.RESULT_MSG["exeption"] = [];
-
-                        // msg.ERROR["data"] = {Message:"An error has occurred"};
-                        // return msg.ERROR;
-
-                        // Msg.push({Message:"An error has occurred", status: 'Occurred'});
-                    }
-                }
-
-
             } else {
 
                 /*
-                  {
-                    status: 500,
-                    data:{},
-                    message:null,
-                    exeption:"مدل مورد نظر از نوع آبجکت نیست"
-                },
-                  
-                  
-                 */
+                    {
+                        status: 500,
+                        data:{},
+                        message:null,
+                        exeption:"آیدی را در مدل بررسی نمایید"
+                    }
+                
+                
+                */
 
                 msg.RESULT_MSG["status"] = 500,
                     msg.RESULT_MSG["data"].push({
-                        Message: `Object ${modelNameInObject} In Model Invalid !`
+                        Message: `Idkey Invalid !`
                     });
                 msg.RESULT_MSG["message"] = [];
                 msg.RESULT_MSG["exeption"].push({
-                    ERROR: "مدل مورد نظر از نوع آبجکت نیست"
+                    ERROR: "آیدی را در مدل بررسی نمایید"
                 });
 
-                // msg.OBJECT_MODEL["data"] = {Message:`Object ${modelNameInObject} In Model Invalid !`};
-                // return msg.OBJECT_MODEL;
 
-                // Msg.push({Message:`Object ${modelNameInObject} In Model Invalid !`, status: 'InvalidObject'});
-                // return Msg;
+                // msg.ID_INVALID["data"] = {Message:`Idkey Invalid !`};
+                // return msg.ID_INVALID;
+
+                // console.log('Idkey Invalid !');
+                // Msg.push({Message:`Idkey Invalid !`, status: 'InvalidIdKey'});
             }
-        } else {
 
+        } // End For 
+
+        return msg.RESULT_MSG;
+
+        //return Msg;
+
+    }
+
+    async function SingleFind_New(filter) {
+
+        /*
+            How To Run Function : 
+        
+            let _filter = {
+            collectionName:"tst",
+            fields:{
+                Name:"ali"
+            }
+        }
+        
+        singleFind(_filter).then((x)=>{
+            console.log("SINGLE_FIND",util.inspect(x, false, null, true))
+        })
+        
+        */
+
+
+
+        if (typeof (filter) == "object") {
+            let collectionName = filter['collectionName'];
+            let collectionTitle = await db.collection(collectionName);
+            let fields = filter['fields'];
+            var dt = await collectionTitle.find(fields).toArray();
+            // let obj = {};
+            // obj[collectionName] = dt;
             /*
-                 {
+                { 
+                    status: 200,
+                    data:{},
+                    message:"اطلاعات با موفقیت یافت شد", 
+                    exeption:null
+                }
+            
+            */
+            msg.RESULT_MSG["status"] = 200;
+            msg.RESULT_MSG["data"] = dt;
+            msg.RESULT_MSG["message"] = ["اطلاعات با موفقیت یافت شد"];
+            msg.RESULT_MSG["exeption"] = [];
+
+            // msg.SUCCESS_FIND["data"] = dt;
+            // return dt;
+            // return msg.SUCCESS_FIND;
+        } else {
+            /*
+                {
                     status: 500,
                     data:{},
                     message:null,
-                    exeption:"آیدی را در مدل بررسی نمایید"
+                    exeption:"مقدار ورودی یا همان فیلتر از نوع آبجکت نمی باشد"
                 }
-            
-            
             */
 
-            msg.RESULT_MSG["status"] = 500,
-                msg.RESULT_MSG["data"].push({
-                    Message: `Idkey Invalid !`
-                });
-            msg.RESULT_MSG["message"] = [];
-            msg.RESULT_MSG["exeption"].push({
-                ERROR: "آیدی را در مدل بررسی نمایید"
+            msg.RESULT_MSG["status"] = 500;
+            msg.RESULT_MSG["data"].push({
+                Message: 'filter Invalid'
             });
+            msg.RESULT_MSG["message"] = [];
+            msg.RESULT_MSG["exeption"] = ["مقدار ورودی یا همان فیلتر از نوع آبجکت نمی باشد"];
 
+            // msg.INVALID_FILTER["data"] = {Message:'filter Invalid'};
+            // return msg.INVALID_FILTER;
 
-            // msg.ID_INVALID["data"] = {Message:`Idkey Invalid !`};
-            // return msg.ID_INVALID;
-
-            // console.log('Idkey Invalid !');
-            // Msg.push({Message:`Idkey Invalid !`, status: 'InvalidIdKey'});
+            //  Msg.push({Message:'filter Invalid' , status: 'InvalidFilter'});
+            //  return Msg;
         }
+        return msg.RESULT_MSG;
 
-    } // End For 
-
-    return msg.RESULT_MSG;
-
-    //return Msg;
-
-}
-
-async function SingleFind_New(filter) {
-
-    /*
-        How To Run Function : 
-    
-        let _filter = {
-        collectionName:"tst",
-        fields:{
-            Name:"ali"
-        }
     }
-    
-    singleFind(_filter).then((x)=>{
-        console.log("SINGLE_FIND",util.inspect(x, false, null, true))
-    })
-    
-    */
-
-
-
-    if (typeof (filter) == "object") {
-        let collectionName = filter['collectionName'];
-        let collectionTitle = await db.collection(collectionName);
-        let fields = filter['fields'];
-        var dt = await collectionTitle.find(fields).toArray();
-        // let obj = {};
-        // obj[collectionName] = dt;
-        /*
-            { 
-                status: 200,
-                data:{},
-                message:"اطلاعات با موفقیت یافت شد", 
-                exeption:null
-            }
-        
-        */
-        msg.RESULT_MSG["status"] = 200;
-        msg.RESULT_MSG["data"] = dt;
-        msg.RESULT_MSG["message"] = ["اطلاعات با موفقیت یافت شد"];
-        msg.RESULT_MSG["exeption"] = [];
-
-        // msg.SUCCESS_FIND["data"] = dt;
-        // return dt;
-        // return msg.SUCCESS_FIND;
-    } else {
-        /*
-             {
-                status: 500,
-                data:{},
-                message:null,
-                exeption:"مقدار ورودی یا همان فیلتر از نوع آبجکت نمی باشد"
-            }
-        */
-
-        msg.RESULT_MSG["status"] = 500;
-        msg.RESULT_MSG["data"].push({
-            Message: 'filter Invalid'
-        });
-        msg.RESULT_MSG["message"] = [];
-        msg.RESULT_MSG["exeption"] = ["مقدار ورودی یا همان فیلتر از نوع آبجکت نمی باشد"];
-
-        // msg.INVALID_FILTER["data"] = {Message:'filter Invalid'};
-        // return msg.INVALID_FILTER;
-
-        //  Msg.push({Message:'filter Invalid' , status: 'InvalidFilter'});
-        //  return Msg;
-    }
-    return msg.RESULT_MSG;
-
-}

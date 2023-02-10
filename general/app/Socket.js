@@ -11,7 +11,7 @@ const {
     Create,
     Create_V1,
     SingleFind,
-    SingleFind_V2,
+    SingleFind_Pagination,
     MultipleFindArray,
     SingleFindLocationHistory
 } = require('../utils/generator');
@@ -383,10 +383,23 @@ module.exports = {
         io_socket.on("find-everyEvent", _findData => {
             let eventName = _findData['eventName'];
             delete _findData['eventName']; 
+            // console.log('FFFF' , _findData);
             SingleFind(_findData, null).then(result => {
+                // console.log('RDDD' , result);
                 io_socket.emit(eventName, result);
             });
         });
+
+        
+        io_socket.on("find-Pagination", _findData => {
+            console.log('_PAGE' , _findData);
+            let eventName = _findData['eventName'];
+            delete _findData['eventName']; 
+            SingleFind_Pagination(_findData, null).then(result => {
+                io_socket.emit(eventName , result);
+            });
+        });
+
 
 
         io_socket.on("multiple-find", _findData => {
