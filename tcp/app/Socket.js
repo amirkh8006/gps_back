@@ -1,6 +1,7 @@
 const {
     Create,
-    SingleFind
+    SingleFind,
+    SingleFind_V2
 } = require('../utils/generator');
 
 var isJSON = require('is-json');
@@ -83,7 +84,7 @@ module.exports = {
                 fields: {
                     uid: uid
                 }
-            }
+            }   
 
             let result = await SingleFind(collectionFilter, null);
 
@@ -157,12 +158,46 @@ module.exports = {
 
             await Create(createLogData, null)
 
+            let requestCollectionFilter = {
+                collectionName: "Requests",
+                fields: {
+                    uid: uid,
+                    status: false
+                }
+            }
+
+            let resultRequests = await SingleFind_V2(requestCollectionFilter, null);
+            let jsonValues = {}
+            if (resultRequests.data.length > 0) {
+                jsonValues = Object.assign({}, resultRequests.data[0]); 
+
+                delete jsonValues['_id'];
+                delete jsonValues['createdAt'];
+                delete jsonValues['updatedAt'];
+                delete jsonValues['shamsi_createAt'];
+                delete jsonValues['status'];
+            }
+
+            tcp_socket.write(JSON.stringify(jsonValues));
+            tcp_socket.end();
+
+            if (resultRequests.data.length > 0) {
+
+                let requestCollectionData = {
+                    Requests: {
+                        id: resultRequests.data[0]._id,
+                        status: true
+                    }
+                }
+
+                await Create(requestCollectionData, null)
+
+            }
+
+
             } else {
                 console.log('JSON NOT OK');
             }
-
-            tcp_socket.write("SEND");
-            tcp_socket.end();
 
             // let json = JSON.parse(str);
             // console.log('AAA' , json);
