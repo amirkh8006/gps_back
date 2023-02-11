@@ -1,6 +1,8 @@
 const {
     Create,
-    SingleFind
+    SingleFind,
+    SingleFind_V2,
+    updateWithUid
 } = require('../utils/generator');
 
 var isJSON = require('is-json');
@@ -51,117 +53,148 @@ module.exports = {
             let isJson = isJSON(stringData);
 
             if (isJson) {
-            let parsedData = JSON.parse(stringData)
+                let parsedData = JSON.parse(stringData)
 
-            let {
-                uid,
-                pn1,
-                pn2,
-                pn3,
-                rly,
-                inp,
-                lgt,
-                lat,
-                sp,
-                bp,
-                td,
-                cs,
-                dc,
-                ns,
-                fs,
-                gf,
-                gfs,
-                sv,
-                ft,
-                ed,
-                lp,
-            } = parsedData
+                let {
+                    uid,
+                    pn1,
+                    pn2,
+                    pn3,
+                    rly,
+                    inp,
+                    lgt,
+                    lat,
+                    sp,
+                    bp,
+                    td,
+                    cs,
+                    dc,
+                    ns,
+                    fs,
+                    gf,
+                    gfs,
+                    sv,
+                    ft,
+                    ed,
+                    lp,
+                } = parsedData
 
 
-            let collectionFilter = {
-                collectionName: "location",
-                fields: {
-                    uid: uid
+                let collectionFilter = {
+                    collectionName: "location",
+                    fields: {
+                        uid: uid
+                    }
                 }
-            }
 
-            let result = await SingleFind(collectionFilter, null);
+                let result = await SingleFind(collectionFilter, null);
 
-            let collectionData = {
-                location: {
-                    uid: uid,
-                    pn1: pn1,
-                    pn2: pn2,
-                    pn3: pn3,
-                    rly: rly,
-                    inp: inp,
+                let collectionData = {
                     location: {
-                        type: "Point",
-                        coordinates: [Number(lat), Number(lgt)]
-                    },
-                    sp: sp,
-                    bp: bp,
-                    td: td,
-                    cs: cs,
-                    dc: dc,
-                    ns: ns,
-                    fs: fs,
-                    gf: gf,
-                    gfs: gfs,
-                    sv: sv,
-                    ft: ft,
-                    ed: ed,
-                    lp: lp
+                        uid: uid,
+                        pn1: pn1,
+                        pn2: pn2,
+                        pn3: pn3,
+                        rly: rly,
+                        inp: inp,
+                        location: {
+                            type: "Point",
+                            coordinates: [Number(lat), Number(lgt)]
+                        },
+                        sp: sp,
+                        bp: bp,
+                        td: td,
+                        cs: cs,
+                        dc: dc,
+                        ns: ns,
+                        fs: fs,
+                        gf: gf,
+                        gfs: gfs,
+                        sv: sv,
+                        ft: ft,
+                        ed: ed,
+                        lp: lp
+                    }
                 }
-            }
 
-            if (result.data.length > 0) {
+                if (result.data.length > 0) {
 
-                collectionData.location["id"] = result.data[0]._id;
+                    collectionData.location["id"] = result.data[0]._id;
 
-            } else {
-                collectionData.location["id"] = null;
-            }
-
-            let resultCreate = await Create(collectionData, null)
-            console.log("RESULT" , resultCreate);
-
-
-            tcp_socket.write("SEND");
-            tcp_socket.end();
-
-            let createLogData = {
-                locationLog: {
-                    id: null,
-                    uid: uid,
-                    pn1: pn1,
-                    pn2: pn2,
-                    pn3: pn3,
-                    rly: rly,
-                    inp: inp,
-                    location: {
-                        type: "Point",
-                        coordinates: [Number(lat), Number(lgt)]
-                    },
-                    sp: sp,
-                    bp: bp,
-                    td: td,
-                    cs: cs,
-                    dc: dc,
-                    ns: ns,
-                    fs: fs,
-                    gf: gf,
-                    gfs: gfs,
-                    sv: sv,
-                    ft: ft,
-                    ed: ed,
-                    lp: lp,
+                } else {
+                    collectionData.location["id"] = null;
                 }
-            }
+
+                await Create(collectionData, null)
+
+                let createLogData = {
+                    locationLog: {
+                        id: null,
+                        uid: uid,
+                        pn1: pn1,
+                        pn2: pn2,
+                        pn3: pn3,
+                        rly: rly,
+                        inp: inp,
+                        location: {
+                            type: "Point",
+                            coordinates: [Number(lat), Number(lgt)]
+                        },
+                        sp: sp,
+                        bp: bp,
+                        td: td,
+                        cs: cs,
+                        dc: dc,
+                        ns: ns,
+                        fs: fs,
+                        gf: gf,
+                        gfs: gfs,
+                        sv: sv,
+                        ft: ft,
+                        ed: ed,
+                        lp: lp,
+                    }
+                }
 
 
-            let createdLogResult = await Create(createLogData, null)
-            console.log("DATA LOG CREATED", createdLogResult);
+                await Create(createLogData, null)
+
+                let requestCollectionFilter = {
+                    collectionName: "Requests",
+                    fields: {
+                        uid: uid,
+                        status: false
+                    }
+                }
+
+                let resultRequests = await SingleFind_V2(requestCollectionFilter, null);
+                let jsonValues = {}
+                if (resultRequests.data.length > 0) {
+                    if (resultRequests.data[0].rly === rly) {
+
+                        let requestCollectionData = {
+                            Requests: {
+                                id: resultRequests.data[0]._id,
+                                status: true
+                            }
+                        }
+
+                        await Create(requestCollectionData, null)
+
+                    } else {
+                        jsonValues = Object.assign({}, resultRequests.data[0]);
+
+                        delete jsonValues['_id'];
+                        delete jsonValues['createdAt'];
+                        delete jsonValues['updatedAt'];
+                        delete jsonValues['shamsi_createAt'];
+                        delete jsonValues['status'];
+                        delete jsonValues['request_type'];
+                    }   
+                }
+
+                tcp_socket.write(JSON.stringify(jsonValues));
+                tcp_socket.end();
 
             } else {
                 console.log('JSON NOT OK');
