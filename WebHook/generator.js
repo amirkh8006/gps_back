@@ -6,13 +6,13 @@ const Validator = require("fastest-validator");
 const {
     databaseName,
     uri
-} = require('../config/config');
+} = require('./config/config');
 const client = new MongoClient(uri);
 const db = client.db(databaseName);
 // var abc = db.collection("Item");
 // console.log('DB' , d);
-var msg = require('../messages');
-var util = require('util');
+var msg = require('./messages');
+
 // const Redis = require("ioredis");
 // const redis = new Redis();
 

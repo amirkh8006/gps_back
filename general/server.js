@@ -1,8 +1,10 @@
+const {port , cors_local , cors_server} = require('./config/config');
 const app = require('express')();
 const http = require('http').Server(app);
-const io = require('socket.io')(http);
+const io = require('socket.io')(http , cors_local);
+// const io = require('socket.io')(http , cors_server);
 const {SOCKET_SERVER} = require('./app/Socket');
-const {port} = require('./config/config');
+
 
 
 
