@@ -1,7 +1,9 @@
 module.exports = {
-    port: 3000,
+    port: 9454,
     uri:"mongodb://localhost:27017/",
     databaseName:"TECHNOGPS",
+    // uri:"mongodb://technogp_ma7280:technogpsPassw0rd1400@31.214.175.14:27017/technogp_tracker",
+    // databaseName:"technogp_tracker",
     config_ipBlockTime: 30 * 1000, // baraye 20 Secound ip block mishe va sms ersal nemikoneh !
     config_countSendSms : 1, // 1 = 3 yani age 1 bashe 3 bar sms mifresteh va badesh on ip va on shomararo  block mikoneh ta modate moayan --- 2 = 4 / 3 = 5
     config_expireSmsCode : 120 * 1000, // yani karbar forsat dareh ke ta 120s code ro bezaneh !
@@ -14,5 +16,7 @@ module.exports = {
     },
     send_location_inteval_ms: 1000,
     send_location_detail_inteval_ms: 5000,
-    NESHAN_API_KEY: "service.ce9181bf37bf4cb68de342a376a8ab06"
+    NESHAN_API_KEY: "service.ce9181bf37bf4cb68de342a376a8ab06",
+    cors_server:{ origins: 'http://technogps.ir:80'},
+    cors_local:{ origins: 'http://localhost:4200'}
 }

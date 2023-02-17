@@ -78,7 +78,7 @@ module.exports = {
         if (data['Auth'] != undefined) {
             // console.log('1');
             msg.RESULT_MSG_Auth["status"] = 0,
-                msg.RESULT_MSG_Auth["data"] = [];
+            msg.RESULT_MSG_Auth["data"] = [];
             msg.RESULT_MSG_Auth["message"] = [];
             msg.RESULT_MSG_Auth["exeption"] = [];
 
@@ -160,24 +160,24 @@ module.exports = {
                     Create(data, null).then(result => {});
                     // ===================== Management Guard ======================
 
-                    let filter_guard = {
-                        collectionName: "managementGuard",
-                        fields: {
-                            mobileNumber: data['Auth']['mobileNumber']
-                        }
-                    }
-                    let _find_guard = await SingleFind(filter_guard);
+                    // let filter_guard = {
+                    //     collectionName: "managementGuard",
+                    //     fields: {
+                    //         mobileNumber: data['Auth']['mobileNumber']
+                    //     }
+                    // }
+                    // let _find_guard = await SingleFind(filter_guard);
 
-                    if (_find_guard['data'].length > 0) {
-                        jsonGuard = {
-                            managementGuard: {
-                                id: _find_guard['data'][0]['_id'],
-                                canActivate: true,
-                                expireTime: new Date().getTime() + config_guards['start-login-TO-login']
-                            }
-                        }
-                    }
-                    Create(jsonGuard, null).then(result => {});
+                    // if (_find_guard['data'].length > 0) {
+                    //     jsonGuard = {
+                    //         managementGuard: {
+                    //             id: _find_guard['data'][0]['_id'],
+                    //             canActivate: true,
+                    //             expireTime: new Date().getTime() + config_guards['start-login-TO-login']
+                    //         }
+                    //     }
+                    // }
+                    // Create(jsonGuard, null).then(result => {});
 
                     // ===================== Management Guard ======================
 
@@ -228,24 +228,24 @@ module.exports = {
 
                         // ================================= Management Guard =========================
 
-                        let filter_guard = {
-                            collectionName: "managementGuard",
-                            fields: {
-                                mobileNumber: data['Auth']['mobileNumber']
-                            }
-                        }
-                        let _find_guard = await SingleFind(filter_guard);
+                        // let filter_guard = {
+                        //     collectionName: "managementGuard",
+                        //     fields: {
+                        //         mobileNumber: data['Auth']['mobileNumber']
+                        //     }
+                        // }
+                        // let _find_guard = await SingleFind(filter_guard);
 
-                        if (_find_guard['data'].length > 0) {
-                            jsonGuard = {
-                                managementGuard: {
-                                    id: _find_guard['data'][0]['_id'],
-                                    canActivate: true,
-                                    expireTime: new Date().getTime() + config_guards['start-login-TO-login']
-                                }
-                            }
-                        }
-                        Create(jsonGuard, null).then(result => {});
+                        // if (_find_guard['data'].length > 0) {
+                        //     jsonGuard = {
+                        //         managementGuard: {
+                        //             id: _find_guard['data'][0]['_id'],
+                        //             canActivate: true,
+                        //             expireTime: new Date().getTime() + config_guards['start-login-TO-login']
+                        //         }
+                        //     }
+                        // }
+                        // Create(jsonGuard, null).then(result => {});
 
                         //=============================================================================
 
@@ -282,24 +282,24 @@ module.exports = {
 
                         // ================================= Management Guard =========================
 
-                        let filter_guard = {
-                            collectionName: "managementGuard",
-                            fields: {
-                                mobileNumber: data['Auth']['mobileNumber']
-                            }
-                        }
-                        let _find_guard = await SingleFind(filter_guard);
+                        // let filter_guard = {
+                        //     collectionName: "managementGuard",
+                        //     fields: {
+                        //         mobileNumber: data['Auth']['mobileNumber']
+                        //     }
+                        // }
+                        // let _find_guard = await SingleFind(filter_guard);
 
-                        if (_find_guard['data'].length > 0) {
-                            jsonGuard = {
-                                managementGuard: {
-                                    id: _find_guard['data'][0]['_id'],
-                                    canActivate: false,
-                                    expireTime: new Date().getTime() + config_guards['start-login-TO-login']
-                                }
-                            }
-                        }
-                        Create(jsonGuard, null).then(result => {});
+                        // if (_find_guard['data'].length > 0) {
+                        //     jsonGuard = {
+                        //         managementGuard: {
+                        //             id: _find_guard['data'][0]['_id'],
+                        //             canActivate: false,
+                        //             expireTime: new Date().getTime() + config_guards['start-login-TO-login']
+                        //         }
+                        //     }
+                        // }
+                        // Create(jsonGuard, null).then(result => {});
 
                         //=============================================================================
 

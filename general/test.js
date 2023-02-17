@@ -1,4 +1,4 @@
-const {Create , MultipleFindArray} = require('./utils/generator');
+const {Create , MultipleFindArray , SingleFind} = require('./utils/generator');
 var isJSON = require('is-json');
 // const {encode , decode} = require('./utils/custom');
 var util = require('util');
@@ -29,6 +29,21 @@ var msgpack = require('msgpack-typed-numbers');
   function decodeDate(uint8array) {
     return new Date(msgpack.decode(uint8array));
   }
+
+
+
+
+    
+  
+        
+            let _filter = {
+            collectionName:"Item",
+            fields:{}
+        }
+        
+        SingleFind(_filter).then((x)=>{
+            console.log("SINGLE_FIND",util.inspect(x, false, null, true))
+        })
 
 //   console.log('enc' , encodeDate('1'))
 //   console.log('enc' , decodeDate(Uint8Array(1) [ 1 ]))
