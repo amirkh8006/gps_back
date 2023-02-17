@@ -11,7 +11,7 @@ const {
     Create,
     Create_V1,
     SingleFind,
-    SingleFind_V2,
+    SingleFind_Pagination,
     MultipleFindArray,
     SingleFindLocationHistory,
     SingleFindRequests
@@ -51,8 +51,26 @@ module.exports = {
         //     // return next(new Error("ERROR MSG"));
         // });
 
+        // const address = io_socket.handshake.headers["x-forwarded-for"];
+        // console.log(address);
+
+        // var address = io_socket.handshake.address;
+        // console.log('New connection from ' + address.address + ':' + address.port);
+
+        // const ip = io_socket.handshake.headers['x-forwarded-for'] || io_socket.conn.remoteAddress.split(":")[3];
+        // console.log(ip);
+
+        // var endpoint = io_socket.manager.handshaken[io_socket.id].address;
+        // console.log('Client connected from: ' + endpoint.address + ":" + endpoint.port);
+
+        // const ip = io_socket.handshake.headers["x-forwarded-for"].split(",")[1].toString().substring(1, this.length);
+        // console.log(ip);
+
+
+        io_socket.ipAddress = io_socket.request.connection.remoteAddress;
+
         var socketId = io_socket.id;
-        var clientIp = io_socket.request.connection.remoteAddress;
+        var clientIp = io_socket.ipAddress //io_socket.request.connection.remoteAddress;
         var clientPort = io_socket.request.connection.remotePort;
 
         console.log(`Socket ${socketId} has connected`);
@@ -61,7 +79,8 @@ module.exports = {
         // userRegister(io_socket ,  )
         // console.log(`Header : ${io_socket.handshake}`);
 
-
+        console.log('ipAddress' , clientIp);
+        // console.log('clientIp' , clientIp);
 
         io_socket.on("sendSms_Kavehnegar", async data => {
 
@@ -391,10 +410,23 @@ module.exports = {
         io_socket.on("find-everyEvent", _findData => {
             let eventName = _findData['eventName'];
             delete _findData['eventName']; 
+            // console.log('FFFF' , _findData);
             SingleFind(_findData, null).then(result => {
+                // console.log('RDDD' , result);
                 io_socket.emit(eventName, result);
             });
         });
+
+        
+        io_socket.on("find-Pagination", _findData => {
+            console.log('_PAGE' , _findData);
+            let eventName = _findData['eventName'];
+            delete _findData['eventName']; 
+            SingleFind_Pagination(_findData, null).then(result => {
+                io_socket.emit(eventName , result);
+            });
+        });
+
 
 
         io_socket.on("multiple-find", _findData => {
