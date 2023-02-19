@@ -2,6 +2,8 @@ const {
     Create,
     SingleFind
 } = require('./generator');
+var Kavenegar = require('kavenegar');
+var api = Kavenegar.KavenegarApi({apikey: '67704F2F46716770477463724E41756137746B645541512F6C4A312B6A354542'});
 const uniqueRandomRange = require("unique-random-range");
 const util = require('util');
 const {
@@ -645,6 +647,56 @@ module.exports = {
 
             return result
         }
+    },
+
+    async sendSms(mobileNumber,message){
+
+        // api.Send({
+        //     message: "YELLOW NodeJs MOHAMMAD TEST 123 !",
+        //     sender: "10002020700700",
+        //     receptor: "09383102777"
+        // });
+
+
+        try{
+
+         
+
+            // console.log('Y' , y);
+            // let payload = { receptor: '09351371050' , message: 'SALAM KHOBI !' };
+            var abc = `https://api.kavenegar.com/v1/67704F2F46716770477463724E41756137746B645541512F6C4A312B6A354542/sms/send.json?receptor=${mobileNumber}&sender=10002020700700&message=${message}`
+
+            // var url = "https://api.kavenegar.com/v1/" + "67704F2F46716770477463724E41756137746B645541512F6C4A312B6A354542" + `/sms/send.json/receptor=09351371050&sender=10002020700700&message=test123`;
+    
+
+            let res = await axios.get(abc);
+
+            let data = res.data;
+            return data;
+
+
+            // const request = axios.create({
+            //     method: 'post',
+            //     baseURL: abc
+            //     // headers: {
+            //     //     'Content-Type': 'application/json'
+            //     // }
+            // })
+
+            // await request.get().catch(err => {
+            //     console.log("ERROR", err.response.data);
+
+            // });
+    
+            // let res = await axios.post(url, payload);
+        
+            // let data = res.data;
+            // console.log('SMS_RESULT',data);
+        
+        
+        }catch(e){
+            console.log('error',e);
+        }
     }
 
 }
@@ -683,3 +735,4 @@ async function SendSms_With_Kavehnegar(mobileNumber) {
     return randCode;
 
 }
+
