@@ -24,7 +24,8 @@ const {
     test123,
     userRegister,
     decode , encode , SendSms_With_Body_Kavehnegar,
-    postRequestNeshan
+    postRequestNeshan,
+    sendSms
 } = require('../utils/custom');
 const {
     ObjectID
@@ -444,6 +445,18 @@ module.exports = {
             MultipleFindArray(_findData, null).then(result => {
                 io_socket.emit(eventName, result);
             });
+        });
+
+
+
+        io_socket.on("sendSms",async _findData => {
+            // khat_1 1000551451  Sender
+            // khat_2 10002020700700 Reciever
+            let eventName =  _findData['eventName'];
+            let result =  await sendSms(_findData['mobileNumber'] , _findData['message']);
+            // SendSms_With_Body_Kavehnegar('09351371050','CS,01');
+            // console.log('DT' , dt);
+            io_socket.emit(eventName, result);
         });
 
         // io_socket.on("new-find", param => {

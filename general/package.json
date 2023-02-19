@@ -19,6 +19,7 @@
     "fastest-validator": "^1.15.0",
     "ioredis": "^5.2.4",
     "is-json": "^2.0.1",
+    "kavenegar": "^1.1.4",
     "mongodb": "^4.12.1",
     "msgpack-typed-numbers": "0.0.1",
     "msgpack5": "^6.0.2",
