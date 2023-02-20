@@ -518,6 +518,37 @@ module.exports = {
 
     },
 
+    async SendSms_With_Body_Kavehnegar_ForDevice(mobileNumber, message) {
+        let obj = {};
+        try {
+
+            var theUrl = "https://api.kavenegar.com/v1/" + "67704F2F46716770477463724E41756137746B645541512F6C4A312B6A354542";
+            theUrl += "/verify/lookup.json?receptor=" + mobileNumber;
+            theUrl += "&token=" + message + "&template=technogps";
+
+            const request = axios.create({
+                method: 'get',
+                baseURL: theUrl,
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+
+           let re =  await request.get().catch(err => {
+                console.log("ERROR", err.response.data);
+
+            });
+            
+            obj['status'] = re['status'];
+            obj['statusText'] = re['statusText'];
+            
+        } catch (error) {
+
+            console.log('ERROR', error);
+        }
+        return obj;
+    },
+
 
 
     // async managementGuard(data , clientIp , clientPort){

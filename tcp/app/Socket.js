@@ -47,34 +47,37 @@ module.exports = {
 
 
 
-            let stringData = data.toString('utf8').trim();
+            let stringData = data.toString('utf8').trim().toLowerCase()
             let isJson = isJSON(stringData);
 
             if (isJson) {
             let parsedData = JSON.parse(stringData)
 
             let {
-                uid,
-                pn1,
-                pn2,
-                pn3,
-                rly,
-                inp,
-                lgt,
-                lat,
-                sp,
-                bp,
-                td,
-                cs,
-                dc,
-                ns,
-                fs,
-                gf,
-                gfs,
-                sv,
-                ft,
-                ed,
-                lp,
+                uid, // OK
+                pn1, // OK
+                pn2, // OK
+                pn3, // OK
+                rly, // OK
+                inp, // OK
+                lgt, // OK
+                lat, // OK
+                sp,  // OK
+                bp, // OK
+                td, // OK
+                cs, // OK
+                dc, // OK
+                ns, // OK
+                fs, // OK
+                gf, // OK
+                gfs, // OK
+                sv, // OK
+                ft, // OK
+                ed, // OK 
+                lp, // OK
+                qm, // OK
+                sc, // OK
+                ac // OK
             } = parsedData
 
 
@@ -111,7 +114,10 @@ module.exports = {
                     sv: sv,
                     ft: ft,
                     ed: ed,
-                    lp: lp
+                    lp: lp,
+                    qm: qm, // OK
+                    sc: sc, // OK
+                    ac: ac // OK
                 }
             }
 
@@ -156,6 +162,9 @@ module.exports = {
                     ft: ft,
                     ed: ed,
                     lp: lp,
+                    qm: qm, // OK
+                    sc: sc, // OK
+                    ac: ac // OK
                 }
             }
 
