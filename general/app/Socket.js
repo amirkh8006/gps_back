@@ -14,7 +14,8 @@ const {
     SingleFind_Pagination,
     MultipleFindArray,
     SingleFindLocationHistory,
-    SingleFindBySort
+    SingleFindBySort,
+    SingleFindRequests
 } = require('../utils/generator');
 var util = require('util');
 
