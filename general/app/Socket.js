@@ -480,21 +480,38 @@ module.exports = {
 
 
         io_socket.on("responseSms_FormDevice",async _findData => {
+            // console.log(new Date().getTime());
+            let currentTime = new Date().getTime() - (20 * 1000); // 20s mines 
+            let Add_currentTime = new Date().getTime() + (20 * 1000); // 20s added to currentTime
             let eventName =  _findData['eventName'];
             delete _findData['eventName'];
-            let _resp = await SingleFindBySort(_findData);
+            let receivTime = {
+                $gte: currentTime,
+                $lt: Add_currentTime
+            }
+            _findData['fields']['receivTime'] = receivTime;
+            let COUNTER = 0;
             let interval_responseSms = setInterval(async() => {
+
+                let _resp = await SingleFindBySort(_findData);
+             
+                // console.log('_F_DATA' , _resp);
                 if (_resp['data'].length > 0) {
+                   
                     io_socket.emit(eventName, _resp['data']);
                     clearInterval(interval_responseSms);
-                }else{
-                    io_socket.emit(eventName, []);
-                    clearInterval(interval_responseSms);
+                }
+                else{
+                    if (COUNTER == 20) {
+                        io_socket.emit(eventName, []);
+                        clearInterval(interval_responseSms);
+                    }
+                   
                 }
                
 
                   
-          
+                COUNTER = COUNTER + 1;
             }, 1000);
            
 
