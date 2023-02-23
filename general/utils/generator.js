@@ -1887,14 +1887,16 @@ module.exports = {
         return msg.RESULT_MSG;
 
     },
-    async SingleFindRequests(filter) {
 
-        /*
+    async SingleFindBySort(filter) {
+          /*
             How To Run Function : 
         
             let _filter = {
             collectionName:"tst",
-            uid: UID OF USER
+            fields:{
+                Name:"ali"
+            }
         }
         
         singleFind(_filter).then((x)=>{
@@ -1908,10 +1910,14 @@ module.exports = {
 
             let collectionName = filter['collectionName'];
             let collectionTitle = await db.collection(collectionName);
-            let uuid = filter['uid'];
-            var dt = await collectionTitle.find({
-                uid: uuid
-            }).sort({createdAt: -1}).toArray();
+            let fields = filter['fields'];
+            if (fields['_id']) {
+                let _id = ObjectId(filter['fields']['_id']);
+                filter['fields']['_id'] = _id;
+            }
+            // console.log('GHOLI' , fields);
+            var dt = await collectionTitle.find(fields).limit(1).sort({createdAt:-1}).toArray();
+            // console.log('dt' , dt);
             // let obj = {};
             // obj[collectionName] = dt;
             /*
@@ -1957,6 +1963,7 @@ module.exports = {
         return msg.RESULT_MSG;
 
     }
+
 
 }
 
