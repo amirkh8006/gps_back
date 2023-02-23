@@ -401,6 +401,13 @@ module.exports = {
             });
         });
 
+        io_socket.on("find-Requests", _findData => {
+            console.log("SSSSS" , _findData);
+            SingleFindRequests(_findData, null).then(result => {
+                io_socket.emit('find-Requests', result);
+            });
+        });
+
         io_socket.on("find-everyEvent", _findData => {
             let eventName = _findData['eventName'];
             delete _findData['eventName']; 
