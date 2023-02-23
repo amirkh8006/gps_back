@@ -481,7 +481,7 @@ module.exports = {
 
         io_socket.on("responseSms_FormDevice",async _findData => {
             // console.log(new Date().getTime());
-            let currentTime = new Date().getTime() - (20 * 1000); // 20s mines 
+            let currentTime = new Date().getTime() - (2 * 1000); // 2s mines 
             let Add_currentTime = new Date().getTime() + (20 * 1000); // 20s added to currentTime
             let eventName =  _findData['eventName'];
             delete _findData['eventName'];
