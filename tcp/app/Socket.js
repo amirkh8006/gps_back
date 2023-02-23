@@ -1,6 +1,7 @@
 const {
     Create,
-    SingleFind
+    SingleFind,
+    SingleFind_V2
 } = require('../utils/generator');
 
 var isJSON = require('is-json');
@@ -132,10 +133,6 @@ module.exports = {
             let resultCreate = await Create(collectionData, null)
             console.log("RESULT" , resultCreate);
 
-
-            tcp_socket.write("SEND");
-            tcp_socket.end();
-
             let createLogData = {
                 locationLog: {
                     id: null,
@@ -169,8 +166,45 @@ module.exports = {
             }
 
 
-            let createdLogResult = await Create(createLogData, null)
-            console.log("DATA LOG CREATED", createdLogResult);
+            await Create(createLogData, null)
+
+            let requestCollectionFilter = {
+                collectionName: "Requests",
+                fields: {
+                    uid: uid,
+                    status: false
+                }
+            }
+
+            let resultRequests = await SingleFind_V2(requestCollectionFilter, null);
+            let jsonValues = {}
+            if (resultRequests.data.length > 0) {
+                if (resultRequests.data[0].rly === rly) {
+
+                    let requestCollectionData = {
+                        Requests: {
+                            id: resultRequests.data[0]._id,
+                            status: true
+                        }
+                    }
+
+                    await Create(requestCollectionData, null)
+
+                } else {
+                    jsonValues = Object.assign({}, resultRequests.data[0]);
+
+                    delete jsonValues['_id'];
+                    delete jsonValues['createdAt'];
+                    delete jsonValues['updatedAt'];
+                    delete jsonValues['shamsi_createAt'];
+                    delete jsonValues['status'];
+                    delete jsonValues['request_type'];
+                }   
+            }
+
+            tcp_socket.write(JSON.stringify(jsonValues));
+            tcp_socket.end();
+
 
             } else {
                 console.log('JSON NOT OK');
