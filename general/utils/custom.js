@@ -613,7 +613,7 @@ module.exports = {
             })
 
             let reverseDestination = await requestReverseDestination.get().catch(err => {
-                console.log("NESHAN REVERSE ORIGIN ERROR", err);
+                console.log("NESHAN REVERSE DESTINATION ERROR", err);
                 return err
             });
 
@@ -642,7 +642,7 @@ module.exports = {
             })
 
             let reverse = await requestReverse.get().catch(err => {
-                console.log("NESHAN REVERSE ORIGIN ERROR", err);
+                console.log("NESHAN ONLY REVERSE ORIGIN ERROR", err);
                 return err
             });
 
