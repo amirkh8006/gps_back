@@ -13,7 +13,8 @@ const {
     SingleFind,
     SingleFind_Pagination,
     MultipleFindArray,
-    SingleFindLocationHistory
+    SingleFindLocationHistory,
+    SingleFindBySort
 } = require('../utils/generator');
 var util = require('util');
 
@@ -451,6 +452,29 @@ module.exports = {
             // console.log('DT' , dt);
             io_socket.emit(eventName, result);
         });
+
+        io_socket.on("responseSms_FormDevice",async _findData => {
+            let eventName =  _findData['eventName'];
+            delete _findData['eventName'];
+            let _resp = await SingleFindBySort(_findData);
+            let interval_responseSms = setInterval(async() => {
+                if (_resp['data'].length > 0) {
+                    io_socket.emit(eventName, _resp['data']);
+                    clearInterval(interval_responseSms);
+                }else{
+                    io_socket.emit(eventName, []);
+                    clearInterval(interval_responseSms);
+                }
+               
+
+                  
+          
+            }, 1000);
+           
+
+            
+        });
+        
 
         
         // io_socket.on("new-find", param => {
