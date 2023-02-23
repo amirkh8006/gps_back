@@ -1887,26 +1887,16 @@ module.exports = {
         return msg.RESULT_MSG;
 
     },
-<<<<<<< HEAD
 
     async SingleFindBySort(filter) {
           /*
-=======
-    async SingleFindRequests(filter) {
-
-        /*
->>>>>>> 8501c40eb8c41e7080fc6851933bd5affaa31ec7
             How To Run Function : 
         
             let _filter = {
             collectionName:"tst",
-<<<<<<< HEAD
             fields:{
                 Name:"ali"
             }
-=======
-            uid: UID OF USER
->>>>>>> 8501c40eb8c41e7080fc6851933bd5affaa31ec7
         }
         
         singleFind(_filter).then((x)=>{
@@ -1920,7 +1910,6 @@ module.exports = {
 
             let collectionName = filter['collectionName'];
             let collectionTitle = await db.collection(collectionName);
-<<<<<<< HEAD
             let fields = filter['fields'];
             if (fields['_id']) {
                 let _id = ObjectId(filter['fields']['_id']);
@@ -1929,12 +1918,6 @@ module.exports = {
             // console.log('GHOLI' , fields);
             var dt = await collectionTitle.find(fields).limit(1).sort({createdAt:-1}).toArray();
             // console.log('dt' , dt);
-=======
-            let uuid = filter['uid'];
-            var dt = await collectionTitle.find({
-                uid: uuid
-            }).sort({createdAt: -1}).toArray();
->>>>>>> 8501c40eb8c41e7080fc6851933bd5affaa31ec7
             // let obj = {};
             // obj[collectionName] = dt;
             /*
