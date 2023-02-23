@@ -13,7 +13,8 @@ const {
     SingleFind,
     SingleFind_Pagination,
     MultipleFindArray,
-    SingleFindLocationHistory
+    SingleFindLocationHistory,
+    SingleFindRequests
 } = require('../utils/generator');
 var util = require('util');
 
@@ -397,6 +398,13 @@ module.exports = {
         io_socket.on("find", _findData => {
             SingleFind(_findData, null).then(result => {
                 io_socket.emit('find', result);
+            });
+        });
+
+        io_socket.on("find-Requests", _findData => {
+            console.log("SSSSS" , _findData);
+            SingleFindRequests(_findData, null).then(result => {
+                io_socket.emit('find-Requests', result);
             });
         });
 
