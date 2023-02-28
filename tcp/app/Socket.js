@@ -1,8 +1,7 @@
 const {
     Create,
     SingleFind,
-    SingleFind_V2,
-    updateWithUid
+    SingleFind_V2
 } = require('../utils/generator');
 
 var isJSON = require('is-json');
@@ -49,34 +48,37 @@ module.exports = {
 
 
 
-            let stringData = data.toString('utf8').trim();
+            let stringData = data.toString('utf8').trim().toLowerCase()
             let isJson = isJSON(stringData);
 
             if (isJson) {
                 let parsedData = JSON.parse(stringData)
 
                 let {
-                    uid,
-                    pn1,
-                    pn2,
-                    pn3,
-                    rly,
-                    inp,
-                    lgt,
-                    lat,
-                    sp,
-                    bp,
-                    td,
-                    cs,
-                    dc,
-                    ns,
-                    fs,
-                    gf,
-                    gfs,
-                    sv,
-                    ft,
-                    ed,
-                    lp,
+                    uid, // OK
+                    pn1, // OK
+                    pn2, // OK
+                    pn3, // OK
+                    rly, // OK
+                    inp, // OK
+                    lgt, // OK
+                    lat, // OK
+                    sp, // OK
+                    bp, // OK
+                    td, // OK
+                    cs, // OK
+                    dc, // OK
+                    ns, // OK
+                    fs, // OK
+                    gf, // OK
+                    gfs, // OK
+                    sv, // OK
+                    ft, // OK
+                    ed, // OK 
+                    lp, // OK
+                    qm, // OK
+                    sc, // OK
+                    ac // OK
                 } = parsedData
 
 
@@ -113,7 +115,10 @@ module.exports = {
                         sv: sv,
                         ft: ft,
                         ed: ed,
-                        lp: lp
+                        lp: lp,
+                        qm: qm, // OK
+                        sc: sc, // OK
+                        ac: ac // OK
                     }
                 }
 
@@ -125,7 +130,8 @@ module.exports = {
                     collectionData.location["id"] = null;
                 }
 
-                await Create(collectionData, null)
+                let resultCreate = await Create(collectionData, null)
+                console.log("RESULT", resultCreate);
 
                 let createLogData = {
                     locationLog: {
@@ -153,6 +159,9 @@ module.exports = {
                         ft: ft,
                         ed: ed,
                         lp: lp,
+                        qm: qm, // OK
+                        sc: sc, // OK
+                        ac: ac // OK
                     }
                 }
 
@@ -167,11 +176,32 @@ module.exports = {
                     }
                 }
 
+
+
                 let resultRequests = await SingleFind_V2(requestCollectionFilter, null);
                 let jsonValues = {}
                 if (resultRequests.data.length > 0) {
-                    if (resultRequests.data[0].rly === rly) {
 
+                    jsonValues = Object.assign({}, resultRequests.data[0]);
+
+                    delete jsonValues['_id'];
+                    delete jsonValues['createdAt'];
+                    delete jsonValues['updatedAt'];
+                    delete jsonValues['shamsi_createAt'];
+                    delete jsonValues['status'];
+                    delete jsonValues['request_type'];
+
+                    let isEqual = true;
+
+                    for (let i = 0; i < Object.keys(jsonValues).length; i++) {
+                        let dataValues = parsedData[Object.keys(jsonValues)[i]]
+                        let requestValues = jsonValues[Object.keys(jsonValues)[i]]
+                        if (dataValues != requestValues) {
+                            isEqual = false
+                        }
+                    }
+
+                    if (isEqual) {
                         let requestCollectionData = {
                             Requests: {
                                 id: resultRequests.data[0]._id,
@@ -180,6 +210,8 @@ module.exports = {
                         }
 
                         await Create(requestCollectionData, null)
+
+                        jsonValues = {}
 
                     } else {
                         jsonValues = Object.assign({}, resultRequests.data[0]);
@@ -190,11 +222,38 @@ module.exports = {
                         delete jsonValues['shamsi_createAt'];
                         delete jsonValues['status'];
                         delete jsonValues['request_type'];
-                    }   
+                    }
                 }
+
+                // let resultRequests = await SingleFind_V2(requestCollectionFilter, null);
+                // let jsonValues = {}
+                // if (resultRequests.data.length > 0) {
+                //     if (resultRequests.data[0].rly === rly) {
+
+                //         let requestCollectionData = {
+                //             Requests: {
+                //                 id: resultRequests.data[0]._id,
+                //                 status: true
+                //             }
+                //         }
+
+                //         await Create(requestCollectionData, null)
+
+                //     } else {
+                //         jsonValues = Object.assign({}, resultRequests.data[0]);
+
+                //         delete jsonValues['_id'];
+                //         delete jsonValues['createdAt'];
+                //         delete jsonValues['updatedAt'];
+                //         delete jsonValues['shamsi_createAt'];
+                //         delete jsonValues['status'];
+                //         delete jsonValues['request_type'];
+                //     }
+                // }
 
                 tcp_socket.write(JSON.stringify(jsonValues));
                 tcp_socket.end();
+
 
             } else {
                 console.log('JSON NOT OK');

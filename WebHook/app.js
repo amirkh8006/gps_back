@@ -33,7 +33,8 @@ app.get('/getMsg_webHook',async (req,res)=>{
             from:req.query['from'],
             message:req.query['message'],
             to:req.query['to'],
-            messageid:req.query['messageid']
+            messageid:req.query['messageid'],
+            receivTime: new Date().getTime()
         }
       }
    let result = await Create(_MessageWebHook , null);
