@@ -131,7 +131,7 @@ module.exports = {
                 }
 
                 let resultCreate = await Create(collectionData, null)
-                console.log("RESULT", resultCreate);
+                // console.log("RESULT", resultCreate);
 
                 let createLogData = {
                     locationLog: {

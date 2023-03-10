@@ -138,7 +138,7 @@ module.exports = {
 
             if (validateFields != null && validateFields != undefined && typeof (validateFields) != 'string' && typeof (validateFields) != 'number' && typeof (validateFields) != 'boolean' && Object.keys(validateFields).length > 0 && findIdKey === true && ObjectID.isValid(findIdValue) === true) {
                 // UpdateOne With Validation !
-                console.log('Update With Validation');
+                // console.log('Update With Validation');
 
                 //delete tableFields['id'];
                 const resValidate = await checkValidator(validateFields[tableName], model[tableName]);
@@ -251,7 +251,7 @@ module.exports = {
 
             } else if (findIdKey === true && ObjectID.isValid(findIdValue) === true) {
                 // UpdateOne Without Validation !
-                console.log('Update Without Validation');
+                // console.log('Update Without Validation');
 
                 if (modelIsAllObject === true) {
 
@@ -388,7 +388,7 @@ module.exports = {
 
             } else if (validateFields != null && validateFields != undefined && typeof (validateFields) != 'string' && typeof (validateFields) != 'number' && typeof (validateFields) != 'boolean' && Object.keys(validateFields).length > 0 && findIdValue === null && findIdKey === true) {
                 // InsertOne With Validation !
-                console.log('INSERT With Validation');
+                // console.log('INSERT With Validation');
 
                 delete tableFields['id'];
                 const resValidate = await checkValidator(validateFields[tableName], model[tableName]);
@@ -553,7 +553,7 @@ module.exports = {
 
             } else if (validateFields === null && findIdKey === true && findIdValue === null) {
                 // InsertOne Without Validation !
-                console.log('INSERT Without Validation');
+                // console.log('INSERT Without Validation');
 
 
 
@@ -1178,7 +1178,7 @@ module.exports = {
                 element['Auth']['ip'] = clientIp;
 
                 Create(element, null).then(update => {
-                    console.log('UPDATE', update);
+                    // console.log('UPDATE', update);
                 });
             }
 
@@ -1556,7 +1556,7 @@ module.exports = {
 
         }
 
-        console.log('MM', msg.RESULT_MSG_Auth);
+        // console.log('MM', msg.RESULT_MSG_Auth);
         return msg.RESULT_MSG_Auth;
 
     },
@@ -1607,7 +1607,7 @@ module.exports = {
     
             if (validateFields === null && findIdKey === true && findIdValue === null) {
                 // InsertOne Without Validation !
-                console.log('INSERT Without Validation');
+                // console.log('INSERT Without Validation');
     
               
     
@@ -1697,7 +1697,7 @@ module.exports = {
     
                     }else{
                        
-                        console.log('tableFields_V1' , tableFields);
+                        // console.log('tableFields_V1' , tableFields);
                         const insertToTable = await collectionName.insertOne(tableFields);//
                         if((insertToTable.acknowledged == true) && (insertToTable.insertedId != null || insertToTable.insertedId != undefined)){
     
@@ -2011,7 +2011,7 @@ module.exports = {
 
             if (validateFields != null && validateFields != undefined && typeof (validateFields) != 'string' && typeof (validateFields) != 'number' && typeof (validateFields) != 'boolean' && Object.keys(validateFields).length > 0 && findIdKey === true && ObjectID.isValid(findIdValue) === true) {
                 // UpdateOne With Validation !
-                console.log('Update With Validation');
+                // console.log('Update With Validation');
 
                 //delete tableFields['id'];
                 const resValidate = await checkValidator(validateFields[tableName], model[tableName]);
@@ -2261,7 +2261,7 @@ module.exports = {
 
             } else if (validateFields != null && validateFields != undefined && typeof (validateFields) != 'string' && typeof (validateFields) != 'number' && typeof (validateFields) != 'boolean' && Object.keys(validateFields).length > 0 && findIdValue === null && findIdKey === true) {
                 // InsertOne With Validation !
-                console.log('INSERT With Validation');
+                // console.log('INSERT With Validation');
 
                 delete tableFields['id'];
                 const resValidate = await checkValidator(validateFields[tableName], model[tableName]);
@@ -2426,7 +2426,7 @@ module.exports = {
 
             } else if (validateFields === null && findIdKey === true && findIdValue === null) {
                 // InsertOne Without Validation !
-                console.log('INSERT Without Validation');
+                // console.log('INSERT Without Validation');
 
 
 
