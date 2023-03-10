@@ -60,7 +60,7 @@ module.exports = {
         let Now = new Date().getTime();
 
         // console.log('ADD' , dateNow);
-        console.log('NOW' , Now);
+        // console.log('NOW' , Now);
         return dateNow;
     },
 

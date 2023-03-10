@@ -576,7 +576,7 @@ module.exports = {
             })
 
             let direction = await requestDirection.get().catch(err => {
-                console.log("NESHAN DIRECTION ERROR", err);
+                // console.log("NESHAN DIRECTION ERROR", err);
                 return err
             });
 
@@ -594,7 +594,7 @@ module.exports = {
             })
 
             let reverseOrigin = await requestReverseOrigin.get().catch(err => {
-                console.log("NESHAN REVERSE ORIGIN ERROR", err);
+                // console.log("NESHAN REVERSE ORIGIN ERROR", err);
                 return err
             });
 
@@ -613,7 +613,7 @@ module.exports = {
             })
 
             let reverseDestination = await requestReverseDestination.get().catch(err => {
-                console.log("NESHAN REVERSE DESTINATION ERROR", err);
+                // console.log("NESHAN REVERSE DESTINATION ERROR", err);
                 return err
             });
 
@@ -642,7 +642,7 @@ module.exports = {
             })
 
             let reverse = await requestReverse.get().catch(err => {
-                console.log("NESHAN ONLY REVERSE ORIGIN ERROR", err);
+                // console.log("NESHAN ONLY REVERSE ORIGIN ERROR", err);
                 return err
             });
 
@@ -668,7 +668,7 @@ module.exports = {
             })
 
             let direction = await requestDirection.get().catch(err => {
-                console.log("NESHAN DIRECTION ERROR", err);
+                // console.log("NESHAN DIRECTION ERROR", err);
                 return err
             });
 

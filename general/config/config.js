@@ -2,7 +2,7 @@ module.exports = {
     port: 9454,
     // uri:"mongodb://localhost:27017/",
     // databaseName:"TECHNOGPS",
-    uri:"mongodb://technoGP:5iW1Mjs69Gr@193.151.145.36:27017/technogp_tracker",
+    uri:"mongodb://technoGP:5iW1Mjs69Gr@193.151.145.36:27017/",
     databaseName:"technogp_tracker",
     config_ipBlockTime: 30 * 1000, // baraye 20 Secound ip block mishe va sms ersal nemikoneh !
     config_countSendSms : 1, // 1 = 3 yani age 1 bashe 3 bar sms mifresteh va badesh on ip va on shomararo  block mikoneh ta modate moayan --- 2 = 4 / 3 = 5

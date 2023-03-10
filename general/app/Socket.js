@@ -202,6 +202,18 @@ module.exports = {
 
         io_socket.on("G-loggedIn", async _findData => {
             let obj = {};
+            if (_findData['fields']['token'] === 0) {
+                obj['mobileNumber'] = 0;
+                obj['isLoggedIn'] = false;
+                msg.RESULT_MSG["status"] = 100;
+                msg.RESULT_MSG["data"] = [obj];
+                msg.RESULT_MSG["message"] = [{
+                    SUCCESS: 'توکن ارسال شده معتبر نیست'
+                }];
+                msg.RESULT_MSG["exeption"] = [];
+                io_socket.emit('G-loggedIn', msg.RESULT_MSG);
+                return;
+            }
             let decode_Json = await decodeToken(_findData['fields']['token']);
             let isJson = isJSON(decode_Json);
 
@@ -254,6 +266,17 @@ module.exports = {
             let obj = {};
             let decode_Json = await decodeToken(_findData['fields']['token']);
             let isJson = isJSON(decode_Json);
+
+            if (_findData['fields']['token'] === 0) {
+                msg.RESULT_MSG["status"] = 100;
+                msg.RESULT_MSG["data"] = [obj];
+                msg.RESULT_MSG["message"] = [{
+                    SUCCESS: 'توکن ارسال شده معتبر نیست'
+                }];
+                msg.RESULT_MSG["exeption"] = [];
+                io_socket.emit('G-create-account', msg.RESULT_MSG);
+                return
+            }
 
             if (isJson == true) {
 
@@ -343,7 +366,7 @@ module.exports = {
                     let findedData = find_Account['data']
                     findedData.push(_data_db[0])
                     // Added For Login Time
-                    
+
                     msg.RESULT_MSG["status"] = 200;
                     msg.RESULT_MSG["data"] = findedData;
                     msg.RESULT_MSG["message"] = [{
@@ -485,11 +508,11 @@ module.exports = {
         });
 
 
-        io_socket.on("responseSms_FormDevice",async _findData => {
+        io_socket.on("responseSms_FormDevice", async _findData => {
             // console.log(new Date().getTime());
             let currentTime = new Date().getTime() - (2 * 1000); // 2s mines 
             let Add_currentTime = new Date().getTime() + (20 * 1000); // 20s added to currentTime
-            let eventName =  _findData['eventName'];
+            let eventName = _findData['eventName'];
             delete _findData['eventName'];
             let receivTime = {
                 $gte: currentTime,
@@ -497,35 +520,34 @@ module.exports = {
             }
             _findData['fields']['receivTime'] = receivTime;
             let COUNTER = 0;
-            let interval_responseSms = setInterval(async() => {
+            let interval_responseSms = setInterval(async () => {
 
                 let _resp = await SingleFindBySort(_findData);
-             
+
                 // console.log('_F_DATA' , _resp);
                 if (_resp['data'].length > 0) {
-                   
+
                     io_socket.emit(eventName, _resp['data']);
                     clearInterval(interval_responseSms);
-                }
-                else{
+                } else {
                     if (COUNTER == 20) {
                         io_socket.emit(eventName, []);
                         clearInterval(interval_responseSms);
                     }
-                   
-                }
-               
 
-                  
+                }
+
+
+
                 COUNTER = COUNTER + 1;
             }, 1000);
-           
 
-            
+
+
         });
-        
 
-        
+
+
         // io_socket.on("new-find", param => {
         //     console.log('find' , param);
         //     io_socket.emit('new-find', ['SALAM EVENT']);
@@ -623,33 +645,37 @@ module.exports = {
 
 
 
+
+        let counter = 0;
         var intervalGetLocation;
-        io_socket.on("get-location", (data) => {
+        io_socket.on("get-location", async (data) => {
 
             if (data.finished) {
-                clearInterval(intervalGetLocation)
+                // clearInterval(intervalGetLocation)
                 clearInterval(intervalGetLocationDetail);
                 return;
             }
 
-            intervalGetLocation = setInterval(async () => {
+            // intervalGetLocation = setInterval(async () => {
+            counter++
 
-                let collectionFilter = {
-                    collectionName: "location",
-                    fields: {
-                        uid: data.uid
-                    }
+            let collectionFilter = {
+                collectionName: "location",
+                fields: {
+                    uid: data.uid
                 }
+            }
 
-                let result = await SingleFind(collectionFilter, null);
+            let result = await SingleFind(collectionFilter, null);
 
-                io_socket.emit(`send-location`, {
-                    result: result
-                });
+            io_socket.emit(`send-location`, {
+                result: result,
+                counter
+            });
 
-                //     // 1. Find Online User UID (From data) (Get LocalStorage) 
-                //     // 2. Find UID From Database Json Result Location
-            }, config.send_location_inteval_ms);
+            //     // 1. Find Online User UID (From data) (Get LocalStorage) 
+            //     // 2. Find UID From Database Json Result Location
+            // }, config.send_location_inteval_ms);
 
 
         });
