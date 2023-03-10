@@ -1,6 +1,6 @@
 module.exports = {
     // uri:"mongodb://localhost:27017/",
     // databaseName:"TECHNOGPS",
-    uri:"mongodb://technogp_ma7280:technogpsPassw0rd1400@31.214.175.14:27017/technogp_tracker",
+    uri:"mongodb://technoGP:5iW1Mjs69Gr@193.151.145.36:27017/",
     databaseName:"technogp_tracker"
 }
