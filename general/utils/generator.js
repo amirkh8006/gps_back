@@ -766,6 +766,78 @@ module.exports = {
 
     },
 
+    
+    async SingleFind_V2(filter) {
+
+        /*
+            How To Run Function : 
+        
+            let _filter = {
+            collectionName:"tst",
+            fields:{
+                Name:"ali"
+            }
+        }
+        
+        singleFind(_filter).then((x)=>{
+            console.log("SINGLE_FIND",util.inspect(x, false, null, true))
+        })
+        
+        */
+
+
+        if (typeof (filter) == "object") {
+            let collectionName = filter['collectionName'];
+            let collectionTitle = await db.collection(collectionName);
+            let fields = filter['fields'];
+            var dt = await collectionTitle.find(fields).sort({createdAt: -1}).toArray();
+            // console.log('dt' , dt);
+            // let obj = {};
+            // obj[collectionName] = dt;
+            /*
+                { 
+                    status: 200,
+                    data:{},
+                    message:"اطلاعات با موفقیت یافت شد", 
+                    exeption:null
+                }
+            
+            */
+            msg.RESULT_MSG["status"] = 200;
+            msg.RESULT_MSG["data"] = dt;
+            msg.RESULT_MSG["message"] = ["اطلاعات با موفقیت یافت شد"];
+            msg.RESULT_MSG["exeption"] = [];
+
+            // msg.SUCCESS_FIND["data"] = dt;
+            // return dt;
+            // return msg.SUCCESS_FIND;
+        } else {
+            /*
+                 {
+                    status: 500,
+                    data:{},
+                    message:null,
+                    exeption:"مقدار ورودی یا همان فیلتر از نوع آبجکت نمی باشد"
+                }
+            */
+
+            msg.RESULT_MSG["status"] = 500;
+            msg.RESULT_MSG["data"].push({
+                Message: 'filter Invalid'
+            });
+            msg.RESULT_MSG["message"] = [];
+            msg.RESULT_MSG["exeption"] = ["مقدار ورودی یا همان فیلتر از نوع آبجکت نمی باشد"];
+
+            // msg.INVALID_FILTER["data"] = {Message:'filter Invalid'};
+            // return msg.INVALID_FILTER;
+
+            //  Msg.push({Message:'filter Invalid' , status: 'InvalidFilter'});
+            //  return Msg;
+        }
+        return msg.RESULT_MSG;
+
+    },
+
     async checkValidator(schema, inputObject) {
         const v = new Validator();
         const check = v.compile(schema);
