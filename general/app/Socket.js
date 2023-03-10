@@ -15,7 +15,8 @@ const {
     MultipleFindArray,
     SingleFindLocationHistory,
     SingleFindBySort,
-    SingleFindRequests
+    SingleFindRequests,
+    SingleFind_V2
 } = require('../utils/generator');
 var util = require('util');
 
@@ -29,7 +30,7 @@ const {
     SendSms_With_Body_Kavehnegar,
     SendSms_With_Body_Kavehnegar_ForDevice,
     postRequestNeshan,
-    sendSms
+    sendSms,
 } = require('../utils/custom');
 const {
     ObjectID
@@ -506,6 +507,36 @@ module.exports = {
             // console.log('DT' , dt);
             io_socket.emit(eventName, result);
         });
+
+        io_socket.on("request-detail", async (data) => {
+            let requestCollectionFilter = {
+                collectionName: "Requests",
+                fields: {
+                    uid: data.uid,
+                    status: false
+                }
+            }
+
+
+
+            let resultRequests = await SingleFind_V2(requestCollectionFilter, null);
+            let jsonValues = {}
+            if (resultRequests.data.length > 0) {
+
+                jsonValues = Object.assign({}, resultRequests.data[0]);
+
+                delete jsonValues['_id'];
+                delete jsonValues['createdAt'];
+                delete jsonValues['updatedAt'];
+                delete jsonValues['shamsi_createAt'];
+                delete jsonValues['status'];
+                delete jsonValues['request_type'];
+
+            }
+
+            io_socket.emit("request-result", jsonValues);
+
+        })
 
 
         io_socket.on("responseSms_FormDevice", async _findData => {
