@@ -171,6 +171,7 @@ module.exports = {
                 // let str_jsonEncode = JSON.stringify(jsonForEncode);
                 // let token = encode(str_jsonEncode);
                 find['data'][0]['Auth'][0]['token'] = await newToken(mobileNumber);
+                find['data'][0]['Auth'][0]['currentTime'] = new Date().getTime();
                 // login_obj['token'] = token;
             } else {
                 find['data'][0]['Auth'][0]['token'] = null

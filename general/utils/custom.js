@@ -114,6 +114,7 @@ module.exports = {
                     let _find_MobileNumber_data = _find_MobileNumber['data'][0];
 
                     if (_find_MobileNumber['data'].length > 0) {
+                        // console.log('IF _1 ');
                         // User EXISTS AND UPDATE TABLE !
                         let _count_Mobile = _find_MobileNumber_data['count'];
                         let _id_Mobile = _find_MobileNumber_data['_id'];
@@ -142,6 +143,7 @@ module.exports = {
 
 
                     } else {
+                        // console.log('ELSE _1 ');
                         // New User AND INSERT TABLE !
                         data['Auth']['count'] = 1;
                         data['Auth']['ipBlockTime'] = null;
@@ -210,6 +212,7 @@ module.exports = {
                     console.log('SEND SMS 1 !');
 
                 } else {
+
                     // IP BLOCKED !
                     let _data_db = _find['data'][0];
                     let currentTime = new Date().getTime();
@@ -223,8 +226,12 @@ module.exports = {
 
                         // let smsCode = await SendSms_With_Kavehnegar(data['Auth']['mobileNumber']);
                         let smsCode = 12345;
-                        data['Auth']['smsCode'] = smsCode;
-                        data['Auth']['expiredSmsCode'] = new Date().getTime() + config_expireSmsCode;
+                        obj['Auth']['smsCode'] = smsCode;
+                        obj['Auth']['expiredSmsCode'] = new Date().getTime() + config_expireSmsCode;
+
+                        // console.log("EXPIRE" ,  data['Auth']['expiredSmsCode'] );
+                        // console.log("CUT" ,   new Date().getTime() );
+                        // console.log("OBJ" , obj);
 
                         Create(obj, null).then(result => {});
 
