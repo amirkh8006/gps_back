@@ -4,23 +4,12 @@ const {
     SingleFind_V2
 } = require('../utils/generator');
 
-
 var isJSON = require('is-json');
-const path = require('path');
-let counter_Mohammad = 0;
-let counter_Ebadi = 0;
-let counter_AmirHossein = 0;
-let interval_Mohammad;
-let interval_Ebadi;
-let interval_AmirHossein;
-
 
 
 module.exports = {
 
     TCP_SERVER(tcp_socket) {
-
-
 
 
 
@@ -58,16 +47,12 @@ module.exports = {
             // }
 
 
-           
 
             let stringData = data.toString('utf8').trim().toLowerCase()
             let isJson = isJSON(stringData);
 
-          
-
             if (isJson) {
                 let parsedData = JSON.parse(stringData)
-                
 
                 let {
                     uid, // OK
@@ -95,8 +80,6 @@ module.exports = {
                     sc, // OK
                     ac // OK
                 } = parsedData
-
-              
 
 
                 let collectionFilter = {
@@ -143,7 +126,7 @@ module.exports = {
 
                     collectionData.location["id"] = result.data[0]._id;
 
-                }else {
+                } else {
                     collectionData.location["id"] = null;
                 }
 
@@ -269,72 +252,6 @@ module.exports = {
                 // }
 
                 tcp_socket.write(JSON.stringify(jsonValues));
-
-                //********************* Log To Text File *************** */
-                let fs_file = require('fs');
-                if(uid == "6e90229ee444704eb11fe5ec234730d5"){ 
-                // Mohammad Car 
-                clearInterval(interval_Mohammad);
-
-                interval_Mohammad = setInterval(() => {
-                    counter_Mohammad = counter_Mohammad + 1;
-                }, 1000);
-                let location = lat + ',' + lgt;
-                let json_log = {location:location , counter_secound:counter_Mohammad};
-                let str = JSON.stringify(json_log);
-                let result = str + '\n'
-                fs_file.appendFile("./app/mohammad.txt", result, err => {
-                    if (err) {
-                      console.error(err);
-                    }
-                    // file written successfully
-                  });    
-            
-                
-            
-
-                }else if(uid == "aec929d22cb014f2809d1818a238902c"){
-                // Ebadi Car    
-                
-                clearInterval(interval_Ebadi);
-
-                interval_Ebadi = setInterval(() => {
-                    counter_Ebadi = counter_Ebadi + 1;
-                }, 1000);
-                let location = lat + ',' + lgt;
-                let json_log = {location:location , counter_secound:counter_Ebadi};
-                let str = JSON.stringify(json_log);
-                let result = str + '\n'
-                fs_file.appendFile("./app/mr_Ebadi.txt", result, err => {
-                    if (err) {
-                      console.error(err);
-                    }
-                    // file written successfully
-                  });    
-
-                }else if(uid == "a6c9d34e51f699abd8f747856adaec5e"){
-                // Amirhossein Car   
-                
-                clearInterval(interval_AmirHossein);
-
-                interval_AmirHossein = setInterval(() => {
-                    counter_AmirHossein = counter_AmirHossein + 1;
-                }, 1000);
-                let location = lat + ',' + lgt;
-                let json_log = {location:location , counter_secound:counter_AmirHossein};
-                let str = JSON.stringify(json_log);
-                let result = str + '\n'
-                fs_file.appendFile("./app/amirhossein.txt", result, err => {
-                    if (err) {
-                      console.error(err);
-                    }
-                    // file written successfully
-                  });    
-
-
-                }
-
-                //********************* Log To Text File *************** */
                 tcp_socket.end();
 
 
