@@ -173,8 +173,9 @@ module.exports = {
                 find['data'][0]['Auth'][0]['token'] = await newToken(mobileNumber);
                 find['data'][0]['Auth'][0]['currentTime'] = new Date().getTime();
                 // login_obj['token'] = token;
-            } else {
-                find['data'][0]['Auth'][0]['token'] = null
+            } 
+            else {
+                find['data'][0]['Auth'][0]['token'] = '';
             }
 
 
