@@ -279,8 +279,16 @@ module.exports = {
                 interval_Mohammad = setInterval(() => {
                     counter_Mohammad = counter_Mohammad + 1;
                 }, 1000);
+
+                let year = new Date().getFullYear().toString();
+                let month = (new Date().getMonth() + 1).toString();
+                let day = new Date().getDate().toString();
+                let hour = new Date().getHours().toString();
+                let minute = new Date().getMinutes().toString();
+                let secound = new Date().getSeconds().toString();
+                let fullDate = year + '/' + month + '/' + day + '  ' + hour + ':' + minute + ':' + secound;
                 let location = lat + ',' + lgt;
-                let json_log = {location:location , counter_secound:counter_Mohammad};
+                let json_log = {date: fullDate , location:location , counter_secound:counter_Mohammad};
                 let str = JSON.stringify(json_log);
                 let result = str + '\n'
                 fs_file.appendFile("./app/mohammad.txt", result, err => {
@@ -301,8 +309,15 @@ module.exports = {
                 interval_Ebadi = setInterval(() => {
                     counter_Ebadi = counter_Ebadi + 1;
                 }, 1000);
+                let year = new Date().getFullYear().toString();
+                let month = (new Date().getMonth() + 1).toString();
+                let day = new Date().getDate().toString();
+                let hour = new Date().getHours().toString();
+                let minute = new Date().getMinutes().toString();
+                let secound = new Date().getSeconds().toString();
+                let fullDate = year + '/' + month + '/' + day + '  ' + hour + ':' + minute + ':' + secound;
                 let location = lat + ',' + lgt;
-                let json_log = {location:location , counter_secound:counter_Ebadi};
+                let json_log = {date: fullDate , location:location , counter_secound:counter_Ebadi};
                 let str = JSON.stringify(json_log);
                 let result = str + '\n'
                 fs_file.appendFile("./app/mr_Ebadi.txt", result, err => {
@@ -320,8 +335,15 @@ module.exports = {
                 interval_AmirHossein = setInterval(() => {
                     counter_AmirHossein = counter_AmirHossein + 1;
                 }, 1000);
+                let year = new Date().getFullYear().toString();
+                let month = (new Date().getMonth() + 1).toString();
+                let day = new Date().getDate().toString();
+                let hour = new Date().getHours().toString();
+                let minute = new Date().getMinutes().toString();
+                let secound = new Date().getSeconds().toString();
+                let fullDate = year + '/' + month + '/' + day + '  ' + hour + ':' + minute + ':' + secound;
                 let location = lat + ',' + lgt;
-                let json_log = {location:location , counter_secound:counter_AmirHossein};
+                let json_log = {date: fullDate , location:location , counter_secound:counter_AmirHossein};
                 let str = JSON.stringify(json_log);
                 let result = str + '\n'
                 fs_file.appendFile("./app/amirhossein.txt", result, err => {
